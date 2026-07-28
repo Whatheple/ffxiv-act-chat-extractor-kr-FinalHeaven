@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A chat parser for Final Fantasy XIV Online with the Advanced Combat Tracker (ACT) plugin." />
+  <title>Nuu FFXIV ACT Plugin Chat Extractor</title>
+  <style type="text/css">
+    :root {
+      --color-light-hsl: hsl(0, 0%, 95%);
+      --color-light-highlight-hsl: hsl(0, 0%, 90%);
+      --color-dark-hsl: hsl(0, 0%, 5%);
+      --color-popover-background: hsl(0, 0%, 10%);
+      --color-dark-highlight-hsl: hsl(0, 0%, 15%);
+      --color-width: 20px;
+
+      /* FF14 테마 변수 */
+      --ff14-gold: #c8a84b;
+      --ff14-gold-light: #e8d08a;
+      --ff14-gold-dark: #8a6f2e;
+      --ff14-bg: #1a1510;
+      --ff14-bg-panel: rgba(12, 10, 7, 0.97);
+      --ff14-bg-hover: rgba(200, 168, 75, 0.12);
+      --ff14-border: #c8a84b;
+      --ff14-text: #e8dfc8;
+      --ff14-text-dim: #a09070;
+    }
+
+    a {
+      color: var(--color-light-hsl);
+      cursor: pointer;
+    }
+
+    a:hover {
+      color: var(--color-light-highlight-hsl);
+    }
+
+    .save-as {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      gap: 1rem;
+    }
+
+    .filter {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+    }
+
+
+    #filter-popover {
+      position: fixed;
+      z-index: 200;
+      width: max-content;
+      min-width: 200px;
+      max-width: 480px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.5rem 0.75rem;
+      background-color: var(--color-popover-background);
+      border: 1px solid var(--color-light-hsl);
+      box-shadow: 5px 5px 15px 5px hsla(0, 0%, 95%, 0.1);
+    }
+
+    .filter-types-toggle-container {
+      display: flex;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      font-weight: bold;
+      font-size: 0.85em;
+    }
+
+    .filter-types-toggle-container span {
+      cursor: pointer;
+    }
+
+    .filter-types-toggle-container span:hover {
+      text-decoration: underline;
+      text-decoration-color: var(--color-light-hsl);
+    }
+
+    .hover-highlight {
+      user-select: none;
+    }
+
+    .hover-highlight:hover {
+      background-color: var(--color-dark-highlight-hsl);
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+    }
+    input[type="color"]::-moz-color-swatch {
+      border: none;
+    }
+
+    input[type=color] {
+      width: var(--color-width);
+      height: var(--color-width);
+      border: 1px solid grey;
+      cursor: pointer;
+    }
+
+    .filter-message-type-grid {
+      display: grid;
+      grid-template-columns: 1fr var(--color-width);
+      grid-column-gap: 0.25em;
+      margin-top: 0.25em;
+      padding-right: 0.5rem;
+    }
+
+    .filter-message-type-grid input[type=color] {
+      opacity: 0.2;
+      transition: opacity 50ms ease-in;
+    }
+
+    .filter-message-type-grid:hover input[type=color] {
+      opacity: 1;
+    }
+
+    .filter-message-type {
+      cursor: pointer;
+      display: block;
+    }
+
+    .filter-senders-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-sender {
+      cursor: pointer;
+    }
+
+    .chat-settings-popover-container {
+      margin-top: 0.5rem;
+    }
+
+    body {
+      background-color: hsl(0, 0%, 5%);
+      color: hsl(0, 0%, 95%);
+      text-shadow: 1px 1px 0px rgba(64, 64, 64, 0.18);
+      font-family: Arial;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    #output {
+      padding: 0.5rem;
+    }
+
+    .line {
+      margin: 0.5rem 0;
+    }
+
+    .line.compact-same {
+      margin: 0.1rem 0 !important;
+    }
+    .line.compact-diff {
+      margin: 1rem 0 0.1rem 0 !important;
+    }
+
+    .search-hit-line {
+      border-left: 3px solid orange;
+      background-color: rgba(255, 165, 0, 0.1);
+      padding-left: 5px;
+    }
+    .search-hit-line.current-focus {
+      background-color: rgba(255, 165, 0, 0.3);
+      outline: 1px solid orange;
+    }
+
+    .sender {
+      font-weight: bold;
+    }
+
+    body.white-mode {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+    }
+    body.white-mode #filter-popover {
+      background-color: var(--color-popover-background) !important;
+      border: 1px solid #555 !important;
+    }
+    body.white-mode #filter-popover label,
+    body.white-mode #filter-popover span,
+    body.white-mode #filter-popover p {
+      color: #ffffff !important;
+    }
+    body.white-mode #filter-popover button {
+      color: #000000 !important;
+      background-color: #f0f0f0 !important;
+    }
+    body.white-mode .save-as-html, body.white-mode #undo-btn {
+      color: #000000 !important;
+    }
+    body.white-mode .say {
+      color: #000000 !important;
+    }
+    body.white-mode .search-hit-line {
+      background-color: rgba(255, 165, 0, 0.2);
+    }
+    body.white-mode .sticky-toolbar {
+      background-color: #ffffff !important;
+    }
+
+    /* ── FF14 스크롤바 — 전체 페이지 (크게) ── */
+    /* Chrome/Edge: html에 명시해야 페이지 스크롤바에 적용됨 */
+    html::-webkit-scrollbar {
+      width: 24px;
+      height: 24px;
+    }
+    html::-webkit-scrollbar-track {
+      background: #0e0c08;
+      border-left: 1px solid #2a2010;
+    }
+    html::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #8a6f2e 0%, #c8a84b 50%, #8a6f2e 100%);
+      border-radius: 0;
+    }
+    html::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #c8a84b 0%, #e8d08a 50%, #c8a84b 100%);
+    }
+    html::-webkit-scrollbar-corner {
+      background: #0e0c08;
+    }
+    /* Firefox: auto여야 width 지정이 의미있음 (thin은 브라우저 고정값) */
+    html {
+      scrollbar-width: auto;
+      scrollbar-color: #8a6f2e #0e0c08;
+    }
+
+    /* 팝오버 내부 스크롤바는 작게 */
+    #filter-popover::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    #filter-popover::-webkit-scrollbar-track {
+      background: #0e0c08;
+    }
+    #filter-popover::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #8a6f2e 0%, #c8a84b 50%, #8a6f2e 100%);
+    }
+    #filter-popover {
+      scrollbar-width: thin;
+      scrollbar-color: #8a6f2e #0e0c08;
+    }
+
+    body.white-mode html { scrollbar-color: #c8a84b #ece4d0; }
+    body.white-mode html::-webkit-scrollbar-track { background: #ece4d0; border-left: 1px solid #c8a84b; }
+    body.white-mode html::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #c8a84b 0%, #e8d08a 50%, #c8a84b 100%); }
+    .sticky-toolbar {
+      background: linear-gradient(180deg, #1e1a12 0%, #0e0c08 100%) !important;
+      border-bottom: 1px solid var(--ff14-gold-dark);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(200,168,75,0.15);
+      padding: 6px 10px !important;
+      gap: 0.6rem !important;
+    }
+
+    /* 툴바 버튼 공통 — .filter button 대신 구체 클래스로 한정 */
+    .sticky-toolbar button:not(.popover-close-button),
+    .filter-types, .filter-senders, .sender-colours,
+    .name-rename, .chat-settings, .filter-time {
+      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+      color: var(--ff14-gold-light);
+      border: 1px solid var(--ff14-gold-dark);
+      padding: 3px 10px;
+      font-size: 0.82em;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .sticky-toolbar button:not(.popover-close-button):hover,
+    .filter-types:hover, .filter-senders:hover, .sender-colours:hover,
+    .name-rename:hover, .chat-settings:hover, .filter-time:hover {
+      background: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+      border-color: var(--ff14-gold);
+      color: var(--ff14-gold-light);
+      box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 0 8px rgba(200,168,75,0.08);
+    }
+
+    .sticky-toolbar button:not(.popover-close-button):active,
+    .filter-types:active, .filter-senders:active, .sender-colours:active,
+    .name-rename:active, .chat-settings:active, .filter-time:active {
+      background: linear-gradient(180deg, #1a1510 0%, #0e0c08 100%);
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    /* 저장하기 링크를 버튼처럼 */
+    .save-as-html {
+      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%) !important;
+      color: var(--ff14-gold-light) !important;
+      border: 1px solid var(--ff14-gold-dark) !important;
+      padding: 3px 10px !important;
+      font-size: 0.82em !important;
+      transition: background 0.15s, border-color 0.15s !important;
+    }
+    .save-as-html:hover {
+      background: linear-gradient(180deg, #3a3020 0%, #252010 100%) !important;
+      border-color: var(--ff14-gold) !important;
+      box-shadow: 0 0 6px rgba(200,168,75,0.3) !important;
+    }
+
+    /* 되돌리기 링크 */
+    #undo-btn {
+      color: var(--ff14-gold-light) !important;
+      font-size: 0.82em;
+    }
+    #undo-btn:hover { color: var(--ff14-gold) !important; }
+
+    /* 검색 입력 */
+    #search-input {
+      background: rgba(10, 8, 5, 0.8) !important;
+      color: var(--ff14-text) !important;
+      border: 1px solid var(--ff14-gold-dark) !important;
+      border-radius: 0 !important;
+      padding: 3px 7px !important;
+      font-size: 0.82em;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #search-input:focus {
+      border-color: var(--ff14-gold) !important;
+      box-shadow: 0 0 5px rgba(200,168,75,0.25);
+    }
+    #search-input::placeholder { color: var(--ff14-text-dim); }
+    #search-counter { color: var(--ff14-text-dim); font-size: 0.8em; }
+
+    /* 복사 포맷 고정 박스 */
+    .sticky-toolbar [style*="복사 포맷"] {
+      border-color: var(--ff14-gold-dark) !important;
+    }
+
+    /* 팝오버 FF14 스타일 — position:fixed는 기존 규칙(line 53)에서 유지 */
+    #filter-popover {
+      background: linear-gradient(160deg, #1e1a12 0%, #0e0c08 100%) !important;
+      border: 1px solid var(--ff14-gold-dark) !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(200,168,75,0.07) !important;
+      font-size: 0.96em;
+    }
+
+    /* 팝오버 닫기 버튼 */
+    .popover-close-button {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    /* hover-highlight FF14 스타일 */
+    .hover-highlight:hover {
+      background-color: var(--ff14-bg-hover) !important;
+    }
+
+    /* 팝오버 내부 텍스트 크기 통일 (시간 필터링 기준보다 살짝 작게) */
+    #filter-popover label,
+    #filter-popover span:not(.remove-single-replace),
+    #filter-popover p,
+    #filter-popover .filter-message-type,
+    #filter-popover .hover-highlight {
+      font-size: 0.96em !important;
+    }
+    /* 팝오버 내 텍스트 색상 */
+    #filter-popover label,
+    #filter-popover span,
+    #filter-popover p {
+      color: var(--ff14-text);
+    }
+
+    /* 구분선 느낌 — 팝오버 내 단락 */
+    #filter-popover p {
+      border-bottom: 1px solid var(--ff14-gold-dark);
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+      font-size: 0.82em;
+      color: var(--ff14-text-dim);
+    }
+
+    /* radio / checkbox 색상 */
+    .sticky-toolbar input[type="radio"],
+    .sticky-toolbar input[type="checkbox"] {
+      accent-color: var(--ff14-gold);
+    }
+    #filter-popover input[type="radio"],
+    #filter-popover input[type="checkbox"] {
+      accent-color: var(--ff14-gold);
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 600px) {
+      .log-parser { padding: 8px 10px; margin: 4px; }
+      .sticky-toolbar {
+        gap: 0.4rem !important;
+        padding: 5px 8px !important;
+        flex-wrap: wrap !important;
+      }
+      .filter { flex-wrap: wrap !important; max-width: 100% !important; }
+      .filter-types, .filter-senders, .sender-colours,
+      .name-rename, .chat-settings, .filter-time {
+        font-size: 0.75em !important;
+        padding: 3px 6px !important;
+      }
+      #search-input { width: 120px !important; }
+      #filter-popover {
+        max-width: calc(100vw - 16px) !important;
+        left: 8px !important;
+      }
+      .save-as-html { font-size: 0.78em !important; padding: 3px 6px !important; }
+      #output { padding: 2px 6px; }
+      .line { word-break: break-word; }
+    }
+
+    /* ── FF14: body 기본 ── */
+    body {
+      background-color: #0d0d0d;
+      color: #d0c8b0;
+      font-family: 'Segoe UI', 'Meiryo', 'Noto Sans KR', sans-serif;
+      /* 창 너비에 비례해 폰트 크기 자동 조정: 300px에서 12px ~ 1200px에서 16px */
+      font-size: clamp(12px, 1vw + 11px, 16px);
+    }
+
+    /* ── 로그 파서 영역 ── */
+    .log-parser {
+      padding: 6px 10px;
+      background: linear-gradient(160deg, #1a1610 0%, #0e0c08 100%);
+      border: 1px solid var(--ff14-gold-dark);
+      margin: 12px;
+      box-shadow: 0 0 0 1px #0a0806, 0 4px 20px rgba(0,0,0,0.7);
+      position: relative;
+    }
+    /* 모서리 장식 */
+    .log-parser::before,
+    .log-parser::after {
+      content: '';
+      position: absolute;
+      width: 10px; height: 10px;
+      border-color: var(--ff14-gold);
+      border-style: solid;
+    }
+    .log-parser::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .log-parser::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .log-parser h1 {
+      color: var(--ff14-gold-light);
+      font-size: 1em;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 8px rgba(200,168,75,0.4);
+      border-bottom: 1px solid var(--ff14-gold-dark);
+      padding-bottom: 6px;
+      margin-bottom: 8px !important;
+    }
+    .log-parser p {
+      color: var(--ff14-text-dim);
+      font-size: 0.82em;
+      margin-bottom: 3px !important;
+    }
+
+    /* ── 파일 입력 버튼 ── */
+    #loginput {
+      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+      color: var(--ff14-gold-light);
+      border: 1px solid var(--ff14-gold-dark);
+      padding: 4px 12px;
+      font-size: 0.85em;
+      cursor: pointer;
+    }
+    #loginput:hover {
+      background: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+      border-color: var(--ff14-gold);
+    }
+    #loginput::file-selector-button {
+      background: transparent;
+      color: var(--ff14-gold-light);
+      border: none;
+      font-size: 0.85em;
+      cursor: pointer;
+      padding: 0 8px 0 0;
+    }
+
+    /* ── 에러 텍스트 ── */
+    #error { color: #e04040; font-size: 0.85em; }
+
+    /* ── 툴바 인라인 스타일 override ── */
+    .sticky-toolbar {
+      background: linear-gradient(180deg, #1e1a12 0%, #0e0c08 100%) !important;
+      border-bottom: 1px solid var(--ff14-gold-dark) !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 1px 0 rgba(200,168,75,0.08) !important;
+      padding: 6px 12px !important;
+    }
+
+    /* 복사 포맷 고정 박스 텍스트 */
+    .sticky-toolbar span,
+    .sticky-toolbar label {
+      color: var(--ff14-text);
+      font-size: 0.82em;
+    }
+
+    /* ── 출력 영역 ── */
+    #output {
+      padding: 4px 12px;
+    }
+
+    /* ── 채팅 라인 ── */
+    .line {
+      padding: 1px 4px;
+      line-height: 1.5;
+      border-left: 2px solid transparent;
+      transition: background 0.1s;
+    }
+    .line:hover {
+      background: rgba(200, 168, 75, 0.05);
+      border-left-color: var(--ff14-gold-dark);
+    }
+
+    /* ── 검색 하이라이트 ── */
+    .search-hit-line {
+      background-color: rgba(200, 168, 75, 0.12) !important;
+      border-left-color: var(--ff14-gold) !important;
+    }
+    .search-hit-word {
+      background: rgba(200, 168, 75, 0.35);
+      color: var(--ff14-gold-light);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    /* ── 팝오버 컨테이너 추가 장식 — 상단 왼쪽만 (하단은 스크롤과 충돌) ── */
+    #filter-popover::before {
+      content: '';
+      position: absolute;
+      width: 8px; height: 8px;
+      border-color: var(--ff14-gold);
+      border-style: solid;
+      pointer-events: none;
+      top: 0; left: 0; border-width: 1px 0 0 1px;
+    }
+
+    /* ── 팝오버 닫기 버튼 ── */
+    .popover-close-button {
+      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%) !important;
+      color: var(--ff14-gold-light) !important;
+      border: 1px solid var(--ff14-gold-dark) !important;
+      width: 100%;
+      padding: 4px 0 !important;
+      font-size: 0.82em !important;
+      letter-spacing: 0.1em;
+    }
+    .popover-close-button:hover {
+      background: linear-gradient(180deg, #3a3020 0%, #252010 100%) !important;
+      border-color: var(--ff14-gold) !important;
+    }
+
+    /* ── 팝오버 내 color input ── */
+    #filter-popover input[type="color"] {
+      background: #0e0c08;
+      border: 1px solid var(--ff14-gold-dark);
+      width: 36px; height: 22px;
+      padding: 1px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    #filter-popover input[type="text"],
+    #filter-popover input[type="number"],
+    #filter-popover input[type="time"] {
+      background: rgba(10,8,5,0.8);
+      color: var(--ff14-text);
+      border: 1px solid var(--ff14-gold-dark);
+      padding: 2px 6px;
+      border-radius: 0;
+      font-size: 0.85em;
+      outline: none;
+    }
+    #filter-popover input[type="text"]:focus,
+    #filter-popover input[type="number"]:focus,
+    #filter-popover input[type="time"]:focus {
+      border-color: var(--ff14-gold);
+      box-shadow: 0 0 4px rgba(200,168,75,0.2);
+    }
+
+    /* 시계 아이콘 색상 — 어두운 배경에서 보이도록 */
+    #filter-popover input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(80%) sepia(30%) saturate(400%) hue-rotate(5deg) brightness(110%);
+      cursor: pointer;
+      opacity: 0.85;
+    }
+    #filter-popover input[type="time"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    /* ── 이름변경 팝오버 입력칸 ── */
+    #filter-popover input[type="text"][placeholder="새 이름"] {
+      background: rgba(10,8,5,0.8);
+      border: 1px solid var(--ff14-gold-dark);
+      color: var(--ff14-text);
+    }
+
+    /* ── 화이트 모드 ── */
+    body.white-mode { background-color: #ffffff; color: #000000; }
+    body.white-mode .sticky-toolbar {
+      background: linear-gradient(180deg, #f5f0e8 0%, #ece4d0 100%) !important;
+      border-bottom: 1px solid #c8a84b !important;
+    }
+    body.white-mode .sticky-toolbar button:not(.popover-close-button),
+    body.white-mode .filter-types, body.white-mode .filter-senders,
+    body.white-mode .sender-colours, body.white-mode .name-rename,
+    body.white-mode .chat-settings, body.white-mode .filter-time {
+      background: linear-gradient(180deg, #f5f0e8 0%, #e8dfc8 100%);
+      color: #5a4010;
+      border-color: #c8a84b;
+    }
+    body.white-mode .sticky-toolbar button:not(.popover-close-button):hover,
+    body.white-mode .filter-types:hover, body.white-mode .filter-senders:hover,
+    body.white-mode .sender-colours:hover, body.white-mode .name-rename:hover,
+    body.white-mode .chat-settings:hover, body.white-mode .filter-time:hover {
+      background: linear-gradient(180deg, #fffdf0 0%, #f5efd5 100%);
+    }
+    body.white-mode .save-as-html {
+      background: linear-gradient(180deg, #f5f0e8 0%, #e8dfc8 100%) !important;
+      color: #5a4010 !important;
+      border-color: #c8a84b !important;
+    }
+    body.white-mode #search-input {
+      background: #fff !important;
+      color: #000 !important;
+      border-color: #c8a84b !important;
+    }
+    body.white-mode .log-parser {
+      background: #f5f0e8;
+      border-color: #c8a84b;
+    }
+    body.white-mode .log-parser h1 { color: #5a4010; text-shadow: none; }
+    body.white-mode #filter-popover {
+      background: linear-gradient(160deg, #f5f0e8 0%, #ece4d0 100%) !important;
+      border-color: #c8a84b !important;
+    }
+    body.white-mode #filter-popover label,
+    body.white-mode #filter-popover span,
+    body.white-mode #filter-popover p { color: #3a2c10; }
+    body.white-mode .save-as-html, body.white-mode #undo-btn { color: #000000 !important; }
+  </style>
+<body>
+<section class="log-parser">
+  <input type="checkbox" id="compact-toggle" style="display:none;">
+  <h1 style="margin: 0 0 6px 0;">ACT의 FFXIVLog txt 파일을 불러오세요.</h1>
+  <input id="loginput" type="file">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 6px 0 0 0;">
+    <p style="margin: 0 0 3px 0;">
+      Delete 또는 Backspace 키를 눌러 선택한 줄을 출력 결과에서 삭제할 수 있습니다.
+    </p>
+    <a href="https://github.com/saaratrix/nuu-ffxiv-act-chat-extractor/tree/main"
+       target="_blank"
+       title="original code: Nuusie's Final Fantasy XIV ACT Chat Extractor"
+       style="margin-left: 12px; white-space: nowrap; color: var(--ff14-gold-dark); font-size: 0.85em; text-decoration: none; flex-shrink: 0; font-family: monospace;"
+       onmouseover="this.style.color='var(--ff14-gold-light)'"
+       onmouseout="this.style.color='var(--ff14-gold-dark)'">&lt;/&gt;</a>
+  </div>
+  <p id="error" style="margin: 0; padding: 0;"></p>
+</section>
+<section class="parsed-log" style="display: none;">
+  <div class="sticky-toolbar" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 5px; position: sticky; top: 0; z-index: 100; background-color: var(--color-dark-hsl); padding: 5px 0;">
+    <!-- 되돌리기 버튼 -->
+    <div style="display: flex; align-items: center;">
+      <a id="undo-btn" style="display: none; white-space: nowrap; cursor: pointer; font-weight: bold;">되돌리기 (0)</a>
+    </div>
+
+    <!-- 채팅 HTML 저장하기 + 복사 포맷 고정 (나란히) -->
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: nowrap;">
+      <a class="save-as-html" style="cursor: pointer; font-weight: bold; white-space: nowrap;">채팅 HTML 저장하기</a>
+      <div style="display: flex; gap: 0.8rem; align-items: center; border: 1px solid var(--ff14-gold-dark); padding: 2px 8px; font-weight: bold; font-size: 0.95em; background: rgba(200,168,75,0.06);">
+        <span>복사 포맷 고정:</span>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
+          <input type="radio" name="copy-target" value="upnote" checked> UpNote
+        </label>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
+          <input type="radio" name="copy-target" value="gdocs"> 구글 문서
+        </label>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <input type="text" id="search-input" placeholder="검색 (Enter로 이동)">
+      <span id="search-counter" style="font-size: 0.85em; width: 40px; text-align: center;">0/0</span>
+      <button id="scroll-to-top" title="맨 위로" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none; padding: 2px 7px; font-size: 0.8em;">&#x25B2;</button>
+    </div>
+
+    <div class="filter">
+      <button class="filter-types">필터 타입</button>
+      <button class="filter-senders">발신자 필터링</button>
+      <button class="sender-colours">발신자 색상</button>
+      <button class="name-rename">이름 변경</button>
+      <button class="chat-settings">채팅 설정</button>
+      <button class="filter-time">시간 필터링</button>
+      <div id="filter-popover" style="display: none;">
+        <button class="popover-close-button">닫기</button>
+        <div class="filter-popover-content"></div>
+      </div>
+    </div>
+  </div>
+  <div id="output"></div>
+</section>
+
+<script type="text/javascript">
+  (function() {
+    const nameRegex = /(?<name>[A-Z][a-z']+\s[A-Z][a-z']+)(?<realm>[A-Z][a-z]+)?/;
+    const messageRegex = /^00\|\d+-\d+-\d+T(?<time>\d+:\d+:\d+).*?\|(?<code>[0-9A-Fa-f]{4})\|(?<sender>[^|]*)\|(?<message>[^|]+)\|/;
+    
+    let hasAddedCSS = false;
+    let isSaveAsDirty = false;
+    let alwaysUpdateBlobs = false;
+    let showTimestamp = false;
+    let showServerName = false;
+    let hideNameIcons = false; // 추가: 이름 앞 아이콘 숨기기 토글 상태
+    let startTimeFilter = "";
+    let endTimeFilter = "";
+
+    let deletedLinesStack = [];
+    let isCompactMode = false;
+    let searchQuery = "";
+    let searchMatches = [];
+    let currentSearchIndex = -1;
+
+    let currentParsedLines = [];
+    const messageTypes = {
+      '000a': { code: '000a', class: 'say', name: '말하기', color: '#ffffff', visible: true },
+      '000b': { code: '000b', class: 'shout', name: '외치기', color: '#eb9234', visible: true },
+      '000e': { code: '000e', class: 'party', name: '파티', color: '#1ecce3', visible: true },
+      '000f': { code: '000f', class: 'alliance', name: '연합 파티', color: '#eb9234', visible: true },
+      '0018': { code: '0018', class: 'free', name: '자유부대', color: '#54b068', visible: true },
+      '001c': { code: '001c', class: 'emote-custom', name: '지정감정표현', color: '#888888', visible: true },
+      '001d': { code: '001d', class: 'emote', name: '감정표현', color: '#888888', visible: true },
+      '001e': { code: '001e', class: 'yell', name: '떠들기', color: '#c9c722', visible: true },
+      '0039': { code: '0039', class: 'system', name: '시스템 로그', color: '#abd4ff', visible: true },
+      '000c': { code: '000c', class: 'tell-to', name: '보낸 귓속말', color: '#d439cc', prependSender: 'To ', suffixSender: '', visible: true },
+      '000d': { code: '000d', class: 'tell-from', name: '받은 귓속말', color: '#d439cc', prependSender: 'From ', suffixSender: '', visible: true },
+      '0038': { code: '0038', class: 'whisper', name: '혼잣말', color: '#d439cc', visible: true },
+      '204a': { code: '204a', class: 'dice', name: '주사위', color: '#ffffaa', visible: true },
+      '0839': { code: '0839', class: 'loot', name: '획득/거래 로그', color: '#abd4ff', visible: true },
+      '0010': { code: '0010', class: 'linkshell-1', name: '링크셸 1', color: '#31b56a', visible: true },
+      '0011': { code: '0011', class: 'linkshell-2', name: '링크셸 2', color: '#2a8c9c', visible: true },
+      '0012': { code: '0012', class: 'linkshell-3', name: '링크셸 3', color: '#296196', visible: true },
+      '0013': { code: '0013', class: 'linkshell-4', name: '링크셸 4', color: '#2d509c', visible: true },
+      '0014': { code: '0014', class: 'linkshell-5', name: '링크셸 5', color: '#5959b1', visible: true },
+      '0015': { code: '0015', class: 'linkshell-6', name: '링크셸 6', color: '#7159b1', visible: true },
+      '0016': { code: '0016', class: 'linkshell-7', name: '링크셸 7', color: '#7b51af', visible: true },
+      '0017': { code: '0017', class: 'linkshell-8', name: '링크셸 8', color: '#9551af', visible: true },
+      '0025': { code: '0025', class: 'cw-linkshell-1', name: '서버 초월 링크셸 1', color: '#d5ff80', visible: true },
+      '0065': { code: '0065', class: 'cw-linkshell-2', name: '서버 초월 링크셸 2', color: '#cbf37c', visible: true },
+      '0066': { code: '0066', class: 'cw-linkshell-3', name: '서버 초월 링크셸 3', color: '#c2e779', visible: true },
+      '0067': { code: '0067', class: 'cw-linkshell-4', name: '서버 초월 링크셸 4', color: '#b7d47d', visible: true },
+      '0068': { code: '0068', class: 'cw-linkshell-5', name: '서버 초월 링크셸 5', color: '#aec978', visible: true },
+      '0069': { code: '0069', class: 'cw-linkshell-6', name: '서버 초월 링크셸 6', color: '#a6bf73', visible: true },
+      '006a': { code: '006a', class: 'cw-linkshell-7', name: '서버 초월 링크셸 7', color: '#9eb76c', visible: true },
+      '006b': { code: '006b', class: 'cw-linkshell-8', name: '서버 초월 링크셸 8', color: '#97b262', visible: true },
+    };
+    const messageTypesAsArray = Object.values(messageTypes);
+    const customSenderColours = [];
+    const senders = [];
+    const quotationRules = [
+      { opening: '`', closing: ['`'], active: true, },
+      { opening: '#039;', closing: ['#039;'], active: false, },
+      { opening: '&quot;', closing: ['&quot;'], active: true, },
+      { opening: '‚', closing: ['‘', '’'], active: true, },
+      { opening: '„', closing: ['“'], active: true, },
+      { opening: '‘', closing: ['’'], active: true, },
+      { opening: '“', closing: ['”'], active: true, },
+      { opening: '’', closing: ['’'], active: true, },
+      { opening: '‹', closing: ['›'], active: true, },
+      { opening: '〈', closing: ['〉'], active: true, },
+      { opening: '«', closing: ['»'], active: true, },
+      { opening: '《', closing: ['》'], active: true, },
+      { opening: '›', closing: ['‹'], active: true, },
+      { opening: '»', closing: ['«', '»'], active: true, },
+      { opening: '「', closing: ['」'], active: true, },
+      { opening: '『', closing: ['』'], active: true, },
+    ];
+    const transformTextRules = [
+      { codes: ['001c', '001d'], name: '항상 감정 표현 컬러 표시', regex: /.*/gm, active: true, method: transformTextToEmoteText },
+      { codes: ['001c', '001d'], name: 'Quotes in emotes as say', customMatcher: getQuotationMatches, active: true, method: transformQuotesToSayOrCustomSender },
+      { codes: ['*'], name: 'Asterisks as emote', regex: /\*[^\*]+\*/gm, active: true, method: transformAsterisksAsEmote },
+      { codes: ['*'], name: '( Out of character )', customMatcher: getOutOfCharacterMatches, regex: /\([^\)]+\)/, active: true, method: transformOutOfCharacter },
+    ];
+
+    let errorElement;
+    let filterPopoverElement;
+    const popoverOpeners = {
+      filterTypes: '.filter-types',
+      filterSenders: '.filter-senders',
+      senderColours: '.sender-colours',
+      nameRename: '.name-rename',
+      chatSettings: '.chat-settings',
+      filterTime: '.filter-time',
+    }
+    let lastPopoverOpener = '';
+    let logFilename = '';
+    let existingObjectURLs = [];
+    const nameReplacements = {}; // { 원본이름: { newName, active } }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const logInput = document.getElementById('loginput');
+      errorElement = document.getElementById('error');
+      const filterRootElement = document.querySelector('.filter');
+
+      filterRootElement.querySelector('.filter-types').addEventListener('click', showFilterTypes);
+      filterRootElement.querySelector('.filter-senders').addEventListener('click', showFilterSenders);
+      filterRootElement.querySelector('.sender-colours').addEventListener('click', showSenderColours);
+      filterRootElement.querySelector('.name-rename').addEventListener('click', showNameRename);
+      filterRootElement.querySelector('.chat-settings').addEventListener('click', showChatSettings);
+      filterRootElement.querySelector('.filter-time').addEventListener('click', showFilterTime);
+
+      filterPopoverElement = document.getElementById('filter-popover');
+      filterPopoverElement.querySelector('.popover-close-button').addEventListener('click', closeFilterPopover);
+
+      logInput.addEventListener('change', handleLogUpload, false);
+
+      // 팝오버는 닫기 버튼으로만 닫힘 (외부 클릭 닫기 비활성화)
+      document.addEventListener('keydown', (event) => tryRemoveSelectedText(event));
+
+      // 스크롤 시 팝오버 위치 실시간 갱신 (sticky 툴바 위치 변화 반영)
+      window.addEventListener('scroll', () => {
+        // 맨 위로 버튼 표시/숨김
+        const scrollBtn = document.getElementById('scroll-to-top');
+        if (scrollBtn) scrollBtn.style.display = window.scrollY > 300 ? '' : 'none';
+
+        if (lastPopoverOpener === '') return;
+        const filterRootEl = document.querySelector('.filter');
+        if (!filterRootEl) return;
+        const filterBounds = filterRootEl.getBoundingClientRect();
+        const topPos = filterBounds.bottom + 5;
+        filterPopoverElement.style.top = `${topPos}px`;
+        filterPopoverElement.style.maxHeight = `${window.innerHeight - topPos - 20}px`;
+        // 좌우 경계 재보정
+        const margin = 32;
+        const popoverWidth = filterPopoverElement.offsetWidth;
+        let left = parseFloat(filterPopoverElement.style.left) || 0;
+        if (left + popoverWidth + margin > window.innerWidth) {
+          left = window.innerWidth - popoverWidth - margin;
+        }
+        if (left < margin) left = margin;
+        filterPopoverElement.style.left = `${left}px`;
+      }, { passive: true });
+
+      const undoBtn = document.getElementById('undo-btn');
+      undoBtn.addEventListener('click', () => {
+        if (deletedLinesStack.length === 0) return;
+        const restoredLines = deletedLinesStack.pop();
+        currentParsedLines.push(...restoredLines);
+        currentParsedLines.sort((a, b) => Number(a.id) - Number(b.id));
+        updateUndoCounter();
+        generateOutput(currentParsedLines);
+      });
+
+      document.getElementById('compact-toggle').addEventListener('change', (e) => {
+        isCompactMode = e.target.checked;
+        generateOutput(currentParsedLines);
+      });
+
+      // [추가] 복사 포맷 고정 설정 기억 (localStorage)
+      const savedCopyTarget = localStorage.getItem('ffxiv-copy-target') || 'upnote';
+      const targetRadio = document.querySelector(`input[name="copy-target"][value="${savedCopyTarget}"]`);
+      if (targetRadio) targetRadio.checked = true;
+
+      document.querySelectorAll('input[name="copy-target"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          localStorage.setItem('ffxiv-copy-target', e.target.value);
+        });
+      });
+
+      const searchInput = document.getElementById('search-input');
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        currentSearchIndex = -1;
+        updateSearchHighlights();
+      });
+
+      // [변경] 고정된 설정에 따라 선택 영역만 맞춤 복사하는 로직
+      document.addEventListener('copy', (e) => {
+        const selection = document.getSelection();
+        if (!selection.rangeCount) return;
+
+        const outputElement = document.getElementById('output');
+        // 마우스 선택 영역이 채팅 출력창 내부일 때만 커스텀 복사 작동
+        if (!outputElement || !outputElement.contains(selection.anchorNode)) return;
+
+        const container = document.createElement('div');
+        for (let i = 0; i < selection.rangeCount; i++) {
+           container.appendChild(selection.getRangeAt(i).cloneContents());
+        }
+
+        const lines = container.querySelectorAll('.line');
+        if (lines.length > 0) {
+           e.preventDefault();
+           
+           // 현재 고정(체크)된 복사 대상 플랫폼 확인
+           const copyTarget = document.querySelector('input[name="copy-target"]:checked')?.value || 'upnote';
+           
+           let htmlContent = "";
+           let plainText = "";
+
+           if (copyTarget === 'gdocs') {
+              // 1) 구글 문서 최적화 포맷
+              // 구글 문서는 문단(<p>) 구분을 확실히 해주고, 같은 발신자 대사는 내부 <br>로 이어주어야 여백이 깔끔합니다.
+              htmlContent = "<div style='font-family: Arial, sans-serif;'>";
+              let currentPara = "";
+              
+              lines.forEach((line, index) => {
+                 const sender = line.querySelector('.sender')?.textContent || "";
+                 const message = line.querySelector('.message')?.textContent || "";
+                 
+                 if (index === 0) {
+                    currentPara = `<p style="margin: 0 0 6px 0;"><b>${sender}</b> ${message}`;
+                    plainText += `${sender} ${message}`;
+                 } else {
+                    if (line.classList.contains('compact-same')) {
+                       currentPara += `<br>${message}`;
+                       plainText += `\n${message}`;
+                    } else {
+                       currentPara += "</p>";
+                       htmlContent += currentPara;
+                       currentPara = `<p style="margin: 6px 0 6px 0;"><b>${sender}</b> ${message}`;
+                       plainText += `\n\n${sender} ${message}`;
+                    }
+                 }
+              });
+              currentPara += "</p>";
+              htmlContent += currentPara + "</div>";
+           } else {
+              // 2) UpNote 최적화 포맷
+              // UpNote는 줄바꿈 테그(<br>)를 직관적으로 잘 인식하므로 기존 줄바꿈 형태를 유지합니다.
+              htmlContent = "<div>";
+              lines.forEach((line, index) => {
+                 const sender = line.querySelector('.sender')?.textContent || "";
+                 const message = line.querySelector('.message')?.textContent || "";
+                 
+                 if (index > 0) {
+                    if (line.classList.contains('compact-same')) {
+                       htmlContent += "<br>";
+                       plainText += `\n`;
+                    } else {
+                       htmlContent += "<br><br>";
+                       plainText += `\n\n`;
+                    }
+                 }
+                 htmlContent += `<b>${sender}</b> ${message}`;
+                 plainText += `${sender} ${message}`;
+              });
+              htmlContent += "</div>";
+           }
+
+           e.clipboardData.setData('text/html', htmlContent);
+           e.clipboardData.setData('text/plain', plainText);
+        }
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && searchMatches.length > 0) {
+          e.preventDefault();
+          if (currentSearchIndex >= 0 && searchMatches[currentSearchIndex]) {
+            searchMatches[currentSearchIndex].classList.remove('current-focus');
+          }
+          currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length;
+          searchMatches[currentSearchIndex].classList.add('current-focus');
+          searchMatches[currentSearchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          updateSearchCounter();
+        }
+      });
+
+      document.addEventListener('copy', (e) => {
+        const selection = document.getSelection();
+        if (!selection.rangeCount || !isCompactMode) return;
+
+        const container = document.createElement('div');
+        for (let i = 0; i < selection.rangeCount; i++) {
+           container.appendChild(selection.getRangeAt(i).cloneContents());
+        }
+
+        const lines = container.querySelectorAll('.line');
+        if (lines.length > 0) {
+           e.preventDefault();
+           let htmlContent = "<div>";
+
+           lines.forEach((line, index) => {
+              const sender = line.querySelector('.sender')?.textContent || "";
+              const message = line.querySelector('.message')?.textContent || "";
+              
+              if (index > 0) {
+                 if (line.classList.contains('compact-same')) {
+                    htmlContent += "<br>"; 
+                 } 
+                 else {
+                    htmlContent += "<br><br>";
+                 }
+              }
+
+              htmlContent += `<b>${sender}</b> ${message}`;
+           });
+           
+           htmlContent += "</div>";
+
+           e.clipboardData.setData('text/html', htmlContent);
+           e.clipboardData.setData('text/plain', selection.toString());
+        }
+      });
+
+      // bg-color-picker 이벤트는 채팅 설정 팝오버 내부에서 처리됨 (applyBgColor 함수 사용)
+      // compact-toggle (hidden, 동기화용)
+      document.getElementById('compact-toggle').addEventListener('change', (e) => {
+        isCompactMode = e.target.checked;
+        generateOutput(currentParsedLines);
+      });
+
+      if (window.matchMedia('(any-hover: none)').matches) {
+        alwaysUpdateBlobs = true;
+      } else {
+        const saveAsHTMLAnchor = document.querySelector('.save-as-html');
+        saveAsHTMLAnchor.addEventListener('pointerover', () => {
+          onMouseOverUpdateSaveAsbuttons();
+        });
+        saveAsHTMLAnchor.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (isSaveAsDirty) generateSaveAsButtons();
+          // 현재 설정된 파일명을 기본값으로 입력창 표시
+          const currentName = saveAsHTMLAnchor.download || (logFilename + '.html');
+          const inputName = prompt('저장할 파일명을 입력하세요:', currentName);
+          if (inputName === null) return; // 취소
+          const finalName = inputName.trim() || currentName;
+          // 확장자 없으면 .html 추가
+          const downloadName = finalName.endsWith('.html') ? finalName : finalName + '.html';
+          saveAsHTMLAnchor.download = downloadName;
+          // 실제 다운로드 트리거
+          const tempA = document.createElement('a');
+          tempA.href = saveAsHTMLAnchor.href;
+          tempA.download = downloadName;
+          document.body.appendChild(tempA);
+          tempA.click();
+          document.body.removeChild(tempA);
+        });
+      }
+    });
+
+    function applyBgColor(hex) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
+      document.body.style.backgroundColor = hex;
+      document.body.style.color = textColor;
+      messageTypes['000a'].color = textColor;
+      updateColours();
+    }
+
+    function rgbToHex(rgb) {
+      const m = rgb.match(/\d+/g);
+      if (!m || m.length < 3) return '#0d0d0d';
+      return '#' + m.slice(0, 3).map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+    }
+
+    function updateSearchHighlights() {
+      searchMatches = [];
+      const outputElement = document.getElementById('output');
+      const lines = outputElement.querySelectorAll('.line');
+
+      lines.forEach(lineEl => {
+        lineEl.classList.remove('search-hit-line', 'current-focus');
+        if (searchQuery) {
+          const senderSpan = lineEl.querySelector('.sender');
+          const messageSpan = lineEl.querySelector('.message');
+          const senderText = senderSpan ? senderSpan.textContent.toLowerCase() : '';
+          const messageText = messageSpan ? messageSpan.textContent.toLowerCase() : '';
+          
+          if ((senderText + " " + messageText).includes(searchQuery)) {
+            lineEl.classList.add('search-hit-line');
+            searchMatches.push(lineEl);
+          }
+        }
+      });
+      updateSearchCounter();
+    }
+
+    function updateUndoCounter() {
+      const undoBtn = document.getElementById('undo-btn');
+      if (deletedLinesStack.length > 0) {
+        undoBtn.style.display = '';
+        undoBtn.innerText = `되돌리기 (${deletedLinesStack.length})`;
+      } else {
+        undoBtn.style.display = 'none';
+      }
+    }
+
+    function updateSearchCounter() {
+      const counter = document.getElementById('search-counter');
+      if (searchMatches.length > 0) {
+        counter.innerText = `${currentSearchIndex >= 0 ? currentSearchIndex + 1 : 0}/${searchMatches.length}`;
+      } else {
+        counter.innerText = '0/0';
+      }
+    }
+
+    // 서버 이름을 @포맷으로 반환하는 헬퍼 함수
+    function formatSenderNameForMenu(senderName) {
+      const serverRegex = /(Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르)$/;
+      const match = senderName.match(serverRegex);
+      if (!match) return senderName;
+      const serverName = match[0];
+      const characterName = senderName.replace(serverRegex, '');
+      return characterName + '@' + serverName;
+    }
+
+    function showFilterTypes() {
+      if (lastPopoverOpener === popoverOpeners.filterTypes) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.filterTypes);
+      const fragment = document.createDocumentFragment();
+      addTypesToggle(fragment, messageTypesAsArray, '.filter-message-type input[type=checkbox]');
+      for (const messageType of messageTypesAsArray) {
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'filter-message-type-grid hover-highlight';
+        const messageTypeElement = document.createElement('label');
+        messageTypeElement.className = `filter-message-type ${messageType.class}`;
+        messageTypeElement.innerHTML = `
+          <input id="${messageType.code}" type="checkbox">
+          <span>${messageType.name}</span>
+        `;
+        const inputElement = messageTypeElement.querySelector('input');
+        inputElement.checked = messageType.visible;
+        messageTypeElement.onclick = () => {
+          messageType.visible = inputElement.checked;
+          generateOutput(currentParsedLines);
+        }
+        const colorChanger = document.createElement('input');
+        colorChanger.type = 'color';
+        colorChanger.value = messageType.color;
+        colorChanger._oldValue = messageType.color;
+        colorChanger.addEventListener('input', () => {
+          if (colorChanger.value === colorChanger._oldValue) return;
+          colorChanger._oldValue = colorChanger.value;
+          messageType.color = colorChanger.value;
+          updateColours();
+        });
+        gridContainer.appendChild(messageTypeElement);
+        gridContainer.appendChild(colorChanger);
+        fragment.appendChild(gridContainer);
+      }
+      contentElement.appendChild(fragment);
+      positionPopover();
+    }
+
+    function showFilterSenders() {
+      if (lastPopoverOpener === popoverOpeners.filterSenders) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.filterSenders);
+      const fragment = document.createDocumentFragment();
+      const sortedSenders = getSortedSenders();
+      addTypesToggle(fragment, sortedSenders, 'input[type=checkbox]');
+      const sendersContainerElement = document.createElement("div");
+      sendersContainerElement.className = 'filter-senders-container';
+      for (const sender of sortedSenders) {
+        const senderElement = document.createElement('label');
+        senderElement.className = `filter-sender hover-highlight`;
+        senderElement.innerHTML = `
+          <input type="checkbox" class="hover-highlight">
+          <span>${formatSenderNameForMenu(sender.name)}</span>
+          <span class="sender-count">${sender.count}</span>
+        `;
+        const inputElement = senderElement.querySelector('input');
+        inputElement.checked = sender.visible;
+        senderElement.onclick = () => {
+          sender.visible = inputElement.checked;
+          generateOutput(currentParsedLines);
+        }
+        sendersContainerElement.appendChild(senderElement);
+      }
+      fragment.appendChild(sendersContainerElement);
+      contentElement.appendChild(fragment);
+      positionPopover();
+    }
+
+    function addTypesToggle(fragment, items, query) {
+      const toggleContainer = document.createElement('div');
+      toggleContainer.className = 'filter-types-toggle-container';
+      const allToggle = document.createElement('span');
+      allToggle.innerText = 'All';
+      allToggle.onclick = () => setVisibility(true);
+      const noneToggle = document.createElement('span');
+      noneToggle.innerText = 'None';
+      noneToggle.onclick = () => setVisibility(false);
+      toggleContainer.appendChild(allToggle);
+      toggleContainer.appendChild(noneToggle);
+      fragment.appendChild(toggleContainer);
+
+      function setVisibility(visibility) {
+        const popoverElement = document.getElementById('filter-popover');
+        for (const item of items) item.visible = visibility;
+        const inputElements = popoverElement.querySelectorAll(query);
+        for (const element of inputElements) element.checked = visibility;
+        generateOutput(currentParsedLines);
+      }
+    }
+
+    function showFilterPopoverAndGetContentElement(opener) {
+      clearFilterPopover();
+      lastPopoverOpener = opener;
+      const popoverContent = filterPopoverElement.querySelector('.filter-popover-content');
+      const openerElement = document.querySelector(opener);
+      if (!openerElement) {
+        filterPopoverElement.style.display = '';
+        return popoverContent;
+      }
+
+      // 내용 채우기 전에 hidden으로 열어둠 — 내용 추가 후 positionPopover()로 위치 확정
+      filterPopoverElement.style.visibility = 'hidden';
+      filterPopoverElement.style.display = '';
+      // opener 버튼 위치를 data로 저장해 positionPopover에서 사용
+      filterPopoverElement._openerBounds = openerElement.getBoundingClientRect();
+      return popoverContent;
+    }
+
+    function positionPopover() {
+      const filterRootElement = document.querySelector('.filter');
+      if (!filterRootElement) return;
+      const filterBounds = filterRootElement.getBoundingClientRect();
+      const topPos = filterBounds.bottom + 5;
+      const margin = 32;
+
+      filterPopoverElement.style.top = `${topPos}px`;
+      filterPopoverElement.style.maxHeight = `${window.innerHeight - topPos - 20}px`;
+
+      // 내용이 채워진 뒤 실제 너비 측정
+      const popoverWidth = filterPopoverElement.offsetWidth;
+      const openerLeft = (filterPopoverElement._openerBounds?.left) ?? 0;
+      let left = openerLeft;
+      if (left + popoverWidth + margin > window.innerWidth) {
+        left = window.innerWidth - popoverWidth - margin;
+      }
+      if (left < margin) left = margin;
+      filterPopoverElement.style.left = `${left}px`;
+      filterPopoverElement.style.visibility = '';
+    }
+
+    function closeFilterPopover() {
+      lastPopoverOpener = '';
+      const filterPopoverElement = document.getElementById('filter-popover');
+      filterPopoverElement.style.display = 'none';
+      const contentElement = filterPopoverElement.querySelector('.filter-popover-content');
+      while (contentElement.firstChild) contentElement.removeChild(contentElement.firstChild);
+    }
+
+    function clearFilterPopover() {
+      const contentElement = filterPopoverElement.querySelector('.filter-popover-content');
+      while (contentElement.firstChild) contentElement.removeChild(contentElement.firstChild);
+    }
+
+    function getSortedSenders() {
+      const sortedSenders = [...senders];
+      sortedSenders.sort((a, b) => a.name.localeCompare(b.name));
+      return sortedSenders;
+    }
+
+    function showSenderColours() {
+      if (lastPopoverOpener === popoverOpeners.senderColours) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.senderColours);
+      const fragment = document.createDocumentFragment();
+      const sortedSenders = getSortedSenders();
+      const descriptionElement = document.createElement('p');
+      descriptionElement.innerText = '선택하면 발신자에게 맞춤 색상을 적용합니다.'
+      fragment.appendChild(descriptionElement);
+      const toggleContainer = document.createElement('div');
+      toggleContainer.className = 'filter-types-toggle-container';
+      const noneToggle = document.createElement('span');
+      noneToggle.innerText = 'None';
+      noneToggle.onclick = () => {
+        customSenderColours.splice(0, customSenderColours.length);
+        const checkboxes = contentElement.querySelectorAll('input[type=checkbox]');
+        let hasChanges = false;
+        for (const checkbox of checkboxes) {
+          if (checkbox.checked) hasChanges = true;
+          checkbox.checked = false;
+        }
+        if (hasChanges) generateOutput(currentParsedLines);
+        updateColours();
+      }
+      toggleContainer.appendChild(noneToggle);
+      fragment.appendChild(toggleContainer);
+      for (const sender of sortedSenders) {
+        const senderColourElement = document.createElement('div');
+        senderColourElement.className = 'filter-message-type-grid hover-highlight';
+        senderColourElement.innerHTML = `
+          <label>
+            <input type="checkbox" >
+            <span>${formatSenderNameForMenu(sender.name)}</span>
+          </label>
+          <input type="color">
+        `;
+        const checkboxElement = senderColourElement.querySelector('input[type=checkbox]');
+        checkboxElement.checked = !!customSenderColours.find(s => s === sender);
+        checkboxElement.addEventListener('click', () => {
+          if (!checkboxElement.checked) {
+            const index = customSenderColours.indexOf(sender);
+            if (index !== -1) customSenderColours.splice(index, 1);
+          } else {
+            customSenderColours.push(sender);
+          }
+          updateColours();
+        });
+        checkboxElement.addEventListener('change', () => {
+          requestAnimationFrame(() => generateOutput(currentParsedLines));
+        });
+        const colorElement = senderColourElement.querySelector('input[type=color]');
+        colorElement.value = sender.customColor;
+        colorElement.addEventListener('input', () => {
+          sender.customColor = colorElement.value;
+          if (!checkboxElement.checked) checkboxElement.click();
+          updateColours();
+        });
+        fragment.appendChild(senderColourElement);
+      }
+      contentElement.appendChild(fragment);
+      positionPopover();
+    }
+
+    function showNameRename() {
+      if (lastPopoverOpener === popoverOpeners.nameRename) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.nameRename);
+      const fragment = document.createDocumentFragment();
+
+      const desc = document.createElement('p');
+      desc.innerText = '새 이름을 입력하고 체크박스로 적용/해제할 수 있습니다.';
+      fragment.appendChild(desc);
+
+      const sortedSenders = getSortedSenders();
+
+      for (const sender of sortedSenders) {
+        // 빈 이름(시스템 로그 등)은 이름 변경 목록에서 제외
+        if (!sender.name || sender.name.trim() === '') continue;
+
+        const rule = nameReplacements[sender.name] || { newName: '', active: false };
+
+        const row = document.createElement('div');
+        row.className = 'filter-message-type-grid hover-highlight';
+        row.style.cssText = 'display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 6px; padding: 2px 4px;';
+
+        // 원본 이름 라벨 — 현재 서버명 표시 설정을 따름
+        const label = document.createElement('span');
+        label.textContent = getDisplaySenderName(sender.name);
+        label.style.cssText = 'font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+
+        // 새 이름 입력칸
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = '새 이름';
+        input.value = rule.newName;
+        input.style.cssText = 'width: 100px; padding: 1px 4px; background: transparent; color: inherit; border: 1px solid var(--color-light-hsl); border-radius: 3px; font-size: 0.9em;';
+
+        // 적용 체크박스
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = rule.active && !!rule.newName;
+        checkbox.title = '체크하면 이름 변경 적용';
+
+        const applyChange = () => {
+          const newName = input.value.trim();
+          if (newName && checkbox.checked) {
+            nameReplacements[sender.name] = { newName, active: true };
+          } else if (newName && !checkbox.checked) {
+            nameReplacements[sender.name] = { newName, active: false };
+          } else {
+            delete nameReplacements[sender.name];
+            checkbox.checked = false;
+          }
+          generateOutput(currentParsedLines);
+        };
+
+        // input 변경 시: 값만 저장, 체크박스 상태는 건드리지 않음
+        input.addEventListener('change', () => {
+          applyChange();
+        });
+
+        // 체크박스 클릭 시: 체크박스 상태만 반영
+        checkbox.addEventListener('change', () => {
+          applyChange();
+        });
+
+        row.appendChild(label);
+        row.appendChild(input);
+        row.appendChild(checkbox);
+        fragment.appendChild(row);
+      }
+
+      contentElement.appendChild(fragment);
+      positionPopover();
+    }
+
+    function showChatSettings() {
+      if (lastPopoverOpener === popoverOpeners.chatSettings) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.chatSettings);
+      const fragment = document.createDocumentFragment();
+      const settingsContainerElement = document.createElement('div');
+      settingsContainerElement.className = 'chat-settings-popover-container';
+      
+      // 배경색 선택
+      const bgColorSetting = document.createElement('div');
+      bgColorSetting.className = 'chat-setting hover-highlight';
+      bgColorSetting.style.cssText = 'display: flex; align-items: center; padding: 2px 4px; gap: 6px;';
+      bgColorSetting.innerHTML = `
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: normal;">
+          배경색 선택: <input type="color" id="bg-color-picker" value="${document.body.style.backgroundColor ? rgbToHex(document.body.style.backgroundColor) : '#0d0d0d'}" style="vertical-align: middle;">
+        </label>
+      `;
+      settingsContainerElement.appendChild(bgColorSetting);
+
+      // 같은 캐릭터 대사 붙여보기
+      const compactSetting = document.createElement('div');
+      compactSetting.className = 'chat-setting hover-highlight';
+      compactSetting.innerHTML = `
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <input type="checkbox" id="compact-toggle-inner"> 같은 캐릭터 대사 붙여보기
+        </label>
+      `;
+      const compactInput = compactSetting.querySelector('input');
+      compactInput.checked = isCompactMode;
+      compactInput.addEventListener('change', (e) => {
+        isCompactMode = e.target.checked;
+        // 외부 hidden 체크박스도 동기화
+        const outer = document.getElementById('compact-toggle');
+        if (outer) outer.checked = isCompactMode;
+        generateOutput(currentParsedLines);
+      });
+      settingsContainerElement.appendChild(compactSetting);
+
+      // 배경색 이벤트 (팝오버 내 picker)
+      bgColorSetting.querySelector('#bg-color-picker').addEventListener('input', (e) => {
+        const hex = e.target.value;
+        applyBgColor(hex);
+      });
+
+      const timestampSetting = document.createElement('div');
+      timestampSetting.className = 'chat-setting hover-highlight';
+      timestampSetting.innerHTML = `
+        <label>
+          <input type="checkbox">
+          <span>타임스탬프 표시</span>
+        </label>
+      `;
+      const timestampInput = timestampSetting.querySelector('input');
+      timestampInput.checked = showTimestamp;
+      timestampInput.addEventListener('change', () => {
+        showTimestamp = timestampInput.checked;
+        generateOutput(currentParsedLines);
+      });
+      settingsContainerElement.appendChild(timestampSetting);
+
+      const serverSetting = document.createElement('div');
+      serverSetting.className = 'chat-setting hover-highlight';
+      serverSetting.innerHTML = `
+        <label>
+          <input type="checkbox">
+          <span>서버명 표시</span>
+        </label>
+      `;
+      const serverInput = serverSetting.querySelector('input');
+      serverInput.checked = showServerName;
+      serverInput.addEventListener('change', () => {
+        showServerName = serverInput.checked;
+        generateOutput(currentParsedLines);
+      });
+      settingsContainerElement.appendChild(serverSetting);
+
+      // 추가된 이름 앞 아이콘 숨기기 설정
+      const hideIconSetting = document.createElement('div');
+      hideIconSetting.className = 'chat-setting hover-highlight';
+      hideIconSetting.innerHTML = `
+        <label>
+          <input type="checkbox">
+          <span>이름 앞 ♥ 등 아이콘 숨기기</span>
+        </label>
+      `;
+      const hideIconInput = hideIconSetting.querySelector('input');
+      hideIconInput.checked = hideNameIcons;
+      hideIconInput.addEventListener('change', () => {
+        hideNameIcons = hideIconInput.checked;
+        generateOutput(currentParsedLines);
+      });
+      settingsContainerElement.appendChild(hideIconSetting);
+
+      addTransformRulesToChatSettings(settingsContainerElement);
+      fragment.appendChild(settingsContainerElement);
+      contentElement.appendChild(fragment);
+      positionPopover();
+    }
+
+    function showFilterTime() {
+      if (lastPopoverOpener === popoverOpeners.filterTime) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.filterTime);
+      const container = document.createElement('div');
+      container.style.padding = '10px';
+      container.innerHTML = `
+        <div style="margin-bottom:10px;">
+          <label>시작 시간: <input type="time" step="1" id="start-time" value="${startTimeFilter}"></label>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label>종료 시간: <input type="time" step="1" id="end-time" value="${endTimeFilter}"></label>
+        </div>
+        <button id="apply-time-filter">적용하기</button>
+        <button id="reset-time-filter">초기화</button>
+      `;
+      contentElement.appendChild(container);
+      positionPopover();
+      container.querySelector('#apply-time-filter').onclick = () => {
+        startTimeFilter = container.querySelector('#start-time').value;
+        endTimeFilter = container.querySelector('#end-time').value;
+        generateOutput(currentParsedLines);
+      };
+      container.querySelector('#reset-time-filter').onclick = () => {
+        startTimeFilter = "";
+        endTimeFilter = "";
+        generateOutput(currentParsedLines);
+        closeFilterPopover();
+      };
+    }
+
+    function addTransformRulesToChatSettings(settingsContainerElement) {
+      for (const rule of transformTextRules) {
+        const ruleElement = document.createElement('div');
+        ruleElement.className = 'chat-setting hover-highlight';
+        ruleElement.innerHTML = `
+          <label>
+            <input type="checkbox">
+            <span>${rule.name}</span>
+          </label>
+        `;
+        const input = ruleElement.querySelector('input');
+        input.checked = rule.active;
+        const label = ruleElement.querySelector('label');
+        label.addEventListener('click', () => {
+          rule.active = input.checked;
+          generateOutput(currentParsedLines);
+        });
+        settingsContainerElement.appendChild(ruleElement);
+      }
+    }
+
+    function transformTextToEmoteText(textParts, line) {
+      let text = '';
+      for (const part of textParts) {
+        if (!part.transform) text += part.text;
+        const className = messageTypes['001c'].class;
+        text += `<span class="${className}">${part.text}</span>`;
+      }
+      return text;
+    }
+
+    function transformAsterisksAsEmote(textParts, line) {
+      let text = '';
+      for (const part of textParts) {
+        if (!part.transform) {
+          text += part.text;
+        } else {
+          const className = messageTypes['001c'].class;
+          text += `<span class="${className}">${part.text}</span>`;
+        }
+      }
+      return text;
+    }
+
+    function transformQuotesToSayOrCustomSender(textParts, line) {
+      let text = '';
+      for (const part of textParts) {
+        if (!part.transform) {
+          text += part.text;
+        } else {
+          let className;
+          if (customSenderColours.indexOf(line.senderReference) !== -1) {
+            className = line.senderReference.class;
+          } else {
+            className = messageTypes['000a'].class;
+          }
+          text += `<span class="${className}">${part.text}</span>`;
+        }
+      }
+      return text;
+    }
+
+    function transformOutOfCharacter(textParts, line) {
+      let text = '';
+      for (const part of textParts) {
+        if (!part.transform) {
+          text += part.text;
+        } else {
+          text += `<span style="opacity: 0.8">${part.text}</span>`;
+        }
+      }
+      return text;
+    }
+
+    function getQuotationMatches(text, transformer) {
+      let matches = [];
+      let currentIndex = 0;
+      while (currentIndex < text.length) {
+        const nextIndices = getNextQuotationIndices(text, currentIndex);
+        if (!nextIndices) break;
+        const match = [text.substr(nextIndices.openingIndex, nextIndices.closingIndex - nextIndices.openingIndex)];
+        match.index = nextIndices.openingIndex;
+        matches.push(match);
+        currentIndex = nextIndices.closingIndex;
+      }
+      return matches;
+    }
+
+    function getNextQuotationIndices(text, currentIndex) {
+      const quotations = [];
+      for (const quotationRule of quotationRules) {
+        if (!quotationRule.active) continue;
+        const openingIndex = text.indexOf(quotationRule.opening, currentIndex);
+        if (openingIndex === -1) continue;
+        for (const closingCharacter of quotationRule.closing) {
+          const closingIndex = text.indexOf(closingCharacter, openingIndex + 1);
+          if (closingIndex !== -1) {
+            quotations.push({
+              openingIndex,
+              closingIndex: closingIndex + closingCharacter.length,
+            });
+          }
+        }
+      }
+      if (!quotations.length) return undefined;
+      quotations.sort((a, b) => a.openingIndex - b.openingIndex);
+      return quotations[0];
+    }
+
+    function getOutOfCharacterMatches(text, transformer) {
+      let matches = [];
+      const firstIndex = text.indexOf('(');
+      if (firstIndex === -1 || text.indexOf(')', firstIndex) === -1) return matches;
+      if (!transformer.regex.test(text)) return matches;
+
+      let lookingForOpening = true;
+      let lookingForClosing = false;
+      let currentOpenParenthesisCount = 0;
+      let currentClosedParenthesisCount = 0;
+      let currentOpeningStart = -1;
+
+      for (let i = firstIndex; i < text.length; i++) {
+        const char = text[i];
+        if (lookingForOpening && char === '(') {
+          currentOpenParenthesisCount++;
+        } else if (lookingForClosing && char === ')') {
+          currentClosedParenthesisCount++;
+          if (currentClosedParenthesisCount === currentOpenParenthesisCount) {
+            lookingForOpening = true;
+            lookingForClosing = false;
+            currentOpenParenthesisCount = 0;
+            const length = i - currentOpeningStart + 1;
+            const match = [text.substr(currentOpeningStart, length)];
+            match.index = currentOpeningStart;
+            matches.push(match);
+          }
+        } else {
+          currentClosedParenthesisCount = 0;
+          if (lookingForOpening && currentOpenParenthesisCount > 0) {
+            currentOpeningStart = i - currentOpenParenthesisCount;
+            lookingForOpening = false;
+            lookingForClosing = true;
+          }
+        }
+      }
+      return matches;
+    }
+
+    function parseLines(rawLines) {
+      const parsedLines = [];
+      for (const rawLine of rawLines) {
+        const match = rawLine.match(messageRegex);
+        if (!match) continue;
+        const { time, code, sender, message } = match.groups;
+        const senderRef = getOrCreateSender(sender);
+        parsedLines.push({
+          id: self.crypto.randomUUID ? self.crypto.randomUUID() : Math.random().toString(36),
+          code,
+          time,
+          sender,
+          message: message.trim(),
+          senderReference: senderRef,
+        });
+      }
+      return parsedLines;
+    }
+
+    function handleLogUpload(event) {
+      if (!event.target.files?.length) return;
+      if (!hasAddedCSS) addCSS();
+
+      const file = event.target.files[0];
+      logFilename = file.name;
+      const fr = new FileReader();
+      fr.onload = () => { parseLog(fr.result || ''); }
+      fr.onerror = () => {
+        errorElement.innerHTML = `Failed to read file ${logFilename}`;
+        const outputElement = document.getElementById('output');
+        while (outputElement.firstChild) outputElement.removeChild(outputElement.firstChild);
+      }
+      fr.readAsText(file);
+    }
+
+    function parseLog(logText) {
+      if (!logText) return;
+      closeFilterPopover();
+      customSenderColours.splice(0, customSenderColours.length);
+      clearObjectURLs();
+      
+      deletedLinesStack = []; 
+      updateUndoCounter();
+
+      currentParsedLines = getLines(logText);
+
+      // 001d sender 보정: 전체 파싱 후 알려진 발신자 이름 목록으로 서버명 매칭
+      // startsWith 대신 서버명 목록을 직접 시도 → 동명이인(서버 다른 경우) 오매칭 방지
+      const serverNames = ['Tonberry','Carbuncle','Chocobo','Moogle','Fenrir','톤베리','카벙클','초코보','모그리','펜리르'];
+      const knownSenders = new Set(
+        currentParsedLines
+          .filter(l => l.code !== '001d' && l.sender)
+          .map(l => l.sender)
+      );
+      for (const line of currentParsedLines) {
+        if (line.code !== '001d' || !line.sender) continue;
+        // 이미 서버명이 포함되어 있으면 건너뜀
+        if (serverNames.some(s => line.sender.endsWith(s))) continue;
+        // sender + 각 서버명 조합이 knownSenders에 있는지 확인
+        const candidates = serverNames
+          .map(s => line.sender + s)
+          .filter(candidate => knownSenders.has(candidate));
+        // 후보가 정확히 1개일 때만 교체 — 동명이인(서버 다름)이면 원본 유지
+        if (candidates.length === 1) {
+          line.sender = candidates[0];
+          // senderReference는 이후 addAllSenders()에서 재할당됨
+        }
+      }
+
+      addAllSenders(currentParsedLines);
+      generateOutput(currentParsedLines);
+    }
+
+    function getLines(text) {
+      const lines = text.split('\n');
+      const result = [];
+      const errors = {};
+      let index = 0;
+      for (const line of lines) {
+        const match = line.match(messageRegex);
+        if (!match || !match.groups) continue;
+
+        const code = match.groups['code'].toLowerCase();
+        const cleanedSender = match.groups['sender'].replace(/[\uE000-\uE0FF]/g, '');
+        let rawMessage = match.groups['message'];
+
+        rawMessage = rawMessage.replace(/\uFFFD+/g, '');
+        rawMessage = rawMessage.replace(/\\?\s*i[0-9A-Fa-f]+/g, '');
+        rawMessage = rawMessage.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+        rawMessage = rawMessage.replace(/[\uE000-\uE0FF]/g, '');
+        rawMessage = rawMessage.replace(/\s{2,}/g, ' ');
+
+        const cleanedMessage = escapeHTML(rawMessage).trim();
+        let item = {
+          code,
+          message: cleanedMessage,
+          sender: cleanedSender,
+          time: match.groups['time'],
+        };
+        
+        if (!messageTypes[code]) {
+          let error = errors[code];
+          if (!errors[code]) {
+            error = { code, lines: [] };
+            errors[code] = error
+          }
+          error.lines.push(item);
+          continue;
+        }
+
+        item.id = index.toString();
+        index++;
+
+        // 001d(감정표현): 메시지 맨 앞에 "sender+서버명+조사" 형태가 포함됨
+        // → 서버명을 sender에 추가하고, 조사는 item.emoteJosa에 보관, 메시지에서 이름+조사 제거
+        if (code === '001d' && item.sender) {
+          const serverNames = 'Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르';
+          const escapedSender = item.sender.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          const josaGroup = '이|가|은|는|을|를|와|과|에게|한테|께|님이|씨가';
+          const prefixPattern = new RegExp('^(' + escapedSender + '(?:' + serverNames + ')?)(' + josaGroup + ')?(.+)');
+          const prefixMatch = item.message.match(prefixPattern);
+          if (prefixMatch) {
+            const fullName = prefixMatch[1];
+            const josa = prefixMatch[2] || '';
+            const rest = prefixMatch[3];
+            const serverPart = fullName.slice(item.sender.length);
+            if (serverPart) item.sender = fullName;
+            item.emoteJosa = josa;   // 조사 보관
+            item.message = rest.trimStart();
+          }
+        }
+
+        result.push(item);
+      }
+      return result;
+    }
+
+    function escapeHTML(text) {
+      return text.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getDisplaySenderName(sender) {
+      const serverRegex = /(Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르)$/;
+      const match = sender.match(serverRegex);
+      if (!match) return sender;
+
+      const serverName = match[0];
+      const characterName = sender.replace(serverRegex, '');
+      if (showServerName) {
+        return characterName + '@' + serverName;
+      } else {
+        return characterName;
+      }
+    }
+
+    function addAllSenders(lines) {
+      senders.splice(0, senders.length);
+      for (const line of lines) {
+        let sender = senders.find((s) => s.name === line.sender);
+        if (!sender) {
+          const senderClass = getSenderClass(line.sender);
+          sender = {
+            name: line.sender,
+            count: 0,
+            visible: true,
+            class: senderClass,
+          };
+          senders.push(sender);
+        }
+        line.senderReference = sender;
+        sender.count++;
+      }
+    }
+
+    function getJosa(name, josaType) {
+      // 이름 마지막 글자의 받침 여부로 조사 결정
+      // 영문 이름은 받침 없음으로 처리
+      const last = name[name.length - 1];
+      const code = last ? last.charCodeAt(0) : 0;
+      let hasBatchim = false;
+      if (code >= 0xAC00 && code <= 0xD7A3) {
+        hasBatchim = (code - 0xAC00) % 28 !== 0;
+      }
+      switch (josaType) {
+        case '이가': return hasBatchim ? '이' : '가';
+        case '은는': return hasBatchim ? '은' : '는';
+        case '을를': return hasBatchim ? '을' : '를';
+        case '와과': return hasBatchim ? '과' : '와';
+        case '이': return hasBatchim ? '이' : '';  // 이/없음 (이름+이 붙는 경우)
+        default: return josaType;
+      }
+    }
+
+    function getSenderClass(sender) {
+      // 한글·특수문자 등 모든 문자를 안전하게 처리: 각 문자를 유니코드 코드포인트로 변환
+      return 's-' + Array.from(sender).map(c => {
+        const code = c.codePointAt(0);
+        // 영문 소문자·숫자·하이픈은 그대로, 나머지는 u{코드} 형태로 변환
+        if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) return c;
+        if (c === ' ') return '-';
+        return 'u' + code;
+      }).join('');
+    }
+
+    function generateOutput(lines) {
+      const parsedLogElement = document.querySelector('.parsed-log');
+      
+      const filteredLines = lines.filter(line => {
+        if (!messageTypes[line.code] || !messageTypes[line.code].visible) return false;
+        if (!line.senderReference?.visible) return false;
+        
+        if (startTimeFilter && endTimeFilter) {
+          if (startTimeFilter <= endTimeFilter) {
+            if (line.time < startTimeFilter || line.time > endTimeFilter) return false;
+          } else {
+            if (line.time < startTimeFilter && line.time > endTimeFilter) return false;
+          }
+        } else if (startTimeFilter) {
+          if (line.time < startTimeFilter) return false;
+        } else if (endTimeFilter) {
+          if (line.time > endTimeFilter) return false;
+        }
+        return true;
+      });
+
+      const outputElement = document.getElementById('output');
+      const fragment = document.createDocumentFragment();
+      
+      let lastSender = null;
+
+      for (const line of filteredLines) {
+        const lineElement = createLineElement(line);
+        // compact 비교: 서버명을 제거한 순수 캐릭터 이름 기준
+        // 001d의 sender는 서버명 없이 저장되므로, 일반 채팅(서버명 포함)과 맞추려면 벗겨서 비교
+        const compareSender = line.sender ? getDisplaySenderName(line.sender).replace(/@.*$/, '') : '';
+        if (isCompactMode) {
+          if (lastSender === compareSender) {
+            lineElement.classList.add('compact-same');
+          } else {
+            lineElement.classList.add('compact-diff');
+          }
+        }
+        lastSender = compareSender;
+        fragment.appendChild(lineElement);
+      }
+
+      while (outputElement.firstChild) {
+        outputElement.removeChild(outputElement.firstChild);
+      }
+      outputElement.appendChild(fragment);
+      parsedLogElement.style.display = '';
+
+      updateSearchHighlights();
+      updateColours();
+      dirtySaveAsAndTryUpdate();
+    }
+
+    function createLineElement(line) {
+      const codeDetail = messageTypes[line.code];
+      const codeClass = codeDetail && codeDetail.class;
+      const element = document.createElement('p');
+      const prependSender = codeDetail && codeDetail.prependSender || '';
+      const activeTransformers = transformTextRules.filter(r => r.active);
+      const message = createLineMessage(line, activeTransformers);
+
+      element.className = `line ${codeClass} ${line.senderReference.class}`;
+      element.dataset['id'] = line.id;
+      const isEmoteCustom = line.code === '001c';
+      const isEmote = line.code === '001d';
+
+      const timeHTML = showTimestamp ? `<span class="time">[${line.time}]</span>` : '';
+
+      // 발신자 이름 처리: 원본 이름에 먼저 치환 적용 → 서버명 처리 → 아이콘 숨김
+      let rawSender = line.sender;
+      for (const [origName, rule] of Object.entries(nameReplacements)) {
+        if (rule.active && origName && rule.newName) {
+          const escaped = origName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          rawSender = rawSender.replace(new RegExp(escaped, 'g'), rule.newName);
+        }
+      }
+      let displaySender = getDisplaySenderName(rawSender);
+      if (hideNameIcons) {
+        displaySender = displaySender.replace(/^[^a-zA-Z가-힣0-9]+/g, '');
+      }
+
+      // 001d 메시지 내 다른 캐릭터 이름도 nameReplacements 적용
+      let processedMessage = message;
+      if (isEmote || isEmoteCustom) {
+        for (const [origName, rule] of Object.entries(nameReplacements)) {
+          if (rule.active && origName && rule.newName) {
+            // 메시지는 escapeHTML 처리된 상태이므로 이름도 HTML 이스케이프 후 매칭
+            const htmlEscapedName = origName
+              .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            const htmlEscapedDisplay = getDisplaySenderName(origName)
+              .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            // &x27; 형태도 커버 (파싱 방식에 따라 다를 수 있음)
+            const htmlEscapedNameAlt = origName
+              .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+
+            const newName = escapeHTML(rule.newName);
+            for (const pattern of new Set([htmlEscapedName, htmlEscapedDisplay, htmlEscapedNameAlt])) {
+              const escaped = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+              processedMessage = processedMessage.replace(new RegExp(escaped, 'g'), newName);
+            }
+          }
+        }
+      }
+
+      // 001d: displaySender 기준으로 조사 재계산 (이름 변경 후 받침이 달라질 수 있음)
+      // 001c: 메시지가 조사로 시작하면 displaySender에 맞게 교정
+      let senderSuffix = '';
+      if (isEmote) {
+        // 원본 조사 타입 판별 후 displaySender 기준으로 재계산
+        const origJosa = line.emoteJosa || '';
+        if (origJosa === '이' || origJosa === '가') {
+          senderSuffix = getJosa(displaySender, '이가');
+        } else if (origJosa === '은' || origJosa === '는') {
+          senderSuffix = getJosa(displaySender, '은는');
+        } else if (origJosa === '을' || origJosa === '를') {
+          senderSuffix = getJosa(displaySender, '을를');
+        } else if (origJosa === '와' || origJosa === '과') {
+          senderSuffix = getJosa(displaySender, '와과');
+        } else {
+          senderSuffix = origJosa;
+        }
+      } else if (isEmoteCustom) {
+        // 001c 메시지 앞의 조사를 displaySender 기준으로 교정
+        const josaMatch = processedMessage.match(/^(이|가|은|는|을|를|와|과|이가|은는|을를)/);
+        if (josaMatch) {
+          const origJosa = josaMatch[1];
+          if (origJosa === '이' || origJosa === '가') {
+            senderSuffix = getJosa(displaySender, '이가');
+          } else if (origJosa === '은' || origJosa === '는') {
+            senderSuffix = getJosa(displaySender, '은는');
+          } else if (origJosa === '을' || origJosa === '를') {
+            senderSuffix = getJosa(displaySender, '을를');
+          } else if (origJosa === '와' || origJosa === '과') {
+            senderSuffix = getJosa(displaySender, '와과');
+          }
+          // 메시지에서 앞의 조사 제거 (sender에 붙여서 출력)
+          processedMessage = processedMessage.slice(origJosa.length);
+        }
+      }
+
+      element.innerHTML =
+        timeHTML +
+        (isEmote && !displaySender
+          ? ''
+          : `<span class="sender">${prependSender}${displaySender}${isEmoteCustom ? senderSuffix : (isEmote ? senderSuffix : ':')}</span> `) +
+        `<span class="message">${processedMessage}</span>`;
+      return element;
+    }
+
+    function createCSS() {
+      let css = '';
+      for (const detail of messageTypesAsArray) {
+        css += `.${detail.class} { color: ${detail.color}; }\n`;
+      }
+      for (const sender of customSenderColours) {
+        css += `.${sender.class} { color: ${sender.customColor}; }\n`
+      }
+      return css;
+    }
+
+    function createLineMessage(line, activeTransformers) {
+      let rawMessage = line.message;
+
+      if (!activeTransformers?.length) return rawMessage;
+      
+      let message = rawMessage;
+      for (const transformer of activeTransformers) {
+        message = tryTransformText(message, transformer, line);
+      }
+      return message;
+    }
+
+    function tryTransformText(text, transformer, line) {
+      let canTransform = false;
+      for (const code of transformer.codes) {
+        if (code === '*' || code === line.code) {
+          canTransform = true;
+          break;
+        }
+      }
+      if (!canTransform) return text;
+
+      const matchedText = getMatchedText(text, transformer);
+      if (!matchedText?.length) return text;
+
+      return transformer.method(matchedText, line);
+    }
+
+    function getMatchedText(text, transformer) {
+      let matches;
+      if (transformer.customMatcher) {
+        matches = transformer.customMatcher(text, transformer);
+      } else if (transformer.regex) {
+        matches = [...text.matchAll(transformer.regex)];
+        matches = matches.filter(m => m[0]);
+      }
+      if (!matches?.length) return undefined;
+
+      let result = [];
+      let currentIndex = 0;
+      for (const match of matches) {
+        const before = text.substr(currentIndex, match.index - currentIndex);
+        if (before.length) {
+          result.push({ text: before, transform: false });
+        }
+        result.push({ text: match[0], transform: true });
+        currentIndex = match.index + match[0].length;
+      }
+      if (currentIndex < text.length) {
+        result.push({ text: text.substr(currentIndex), transform: false });
+      }
+      return result;
+    }
+
+    function addCSS() {
+      const styleElement = document.createElement("style");
+      const css = createCSS();
+      styleElement.appendChild(document.createTextNode(css));
+      document.head.appendChild(styleElement);
+      hasAddedCSS = true;
+    }
+
+    function updateColours() {
+      const isWhiteMode = document.body.classList.contains('white-mode');
+      for (const messageType of Object.values(messageTypes)) {
+        let colorToApply = messageType.color;
+        if (isWhiteMode && messageType.code === '000a') {
+          colorToApply = '#000000';
+        }
+        const elements = document.querySelectorAll(`.${messageType.class}`);
+        elements.forEach(el => { el.style.color = colorToApply; });
+      }
+      // 발신자 색상을 필터 타입 색상보다 나중에 덮어써서 우선 적용
+      for (const sender of customSenderColours) {
+        const elements = document.querySelectorAll(`.${sender.class}`);
+        elements.forEach(el => { el.style.color = sender.customColor; });
+      }
+    }
+
+    function clearObjectURLs() {
+      for (const existingUrl of existingObjectURLs) {
+        window.URL.revokeObjectURL(existingUrl);
+      }
+      existingObjectURLs = [];
+    }
+
+    function onMouseOverUpdateSaveAsbuttons() {
+      if (!isSaveAsDirty) return;
+      generateSaveAsButtons();
+    }
+
+    function dirtySaveAsAndTryUpdate() {
+      isSaveAsDirty = true;
+      if (alwaysUpdateBlobs) {
+        generateSaveAsButtons();
+      }
+    }
+
+    function generateSaveAsButtons() {
+      isSaveAsDirty = false;
+      clearObjectURLs();
+      generateSaveAsHTML();
+    }
+
+    function generateSaveAsHTML() {
+      const outputElement = document.getElementById('output');
+      const saveAsHTMLAnchor = document.querySelector('.save-as-html');
+      const output = getHTMLOutput(logFilename, outputElement.innerHTML);
+      const blob = new Blob([output]);
+      const url = window.URL.createObjectURL(blob);
+      saveAsHTMLAnchor.href = url;
+      saveAsHTMLAnchor.download = logFilename + '.html';
+      existingObjectURLs.push(url);
+    }
+
+    function getHTMLOutput(filename, content) {
+      const css = createCSS();
+      const output = `
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${filename}</title>
+  <style>
+body { background-color: hsl(0, 0%, 5%); color: hsl(0, 0%, 95%); }
+body.white-mode { background-color: #ffffff !important; color: #000000 !important; }
+body.white-mode #filter-popover { background-color: #222 !important; }
+body.white-mode #filter-popover label, body.white-mode #filter-popover span { color: #ffffff !important; }
+body.white-mode #filter-popover button { color: #000000 !important; background-color: #f0f0f0 !important; }
+body.white-mode .save-as-html { color: #000000 !important; }
+    ${css}
+  </style>
+</head>
+<body>
+  <div id="output">
+    ${content}
+  </div>
+</body>
+</html>`;
+      return output;
+    }
+
+    function tryRemoveSelectedText(event) {
+      if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+
+      const selection = document.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const outputElement = document.getElementById('output');
+      
+      if (!outputElement.contains(range.commonAncestorContainer)) return;
+
+      const focusLine = getLineElementFromSelectionNode(selection.focusNode);
+      const anchorLine = getLineElementFromSelectionNode(selection.anchorNode);
+      if (!focusLine || !anchorLine) return;
+
+      const idsToRemove = new Set();
+      let isBetween = false;
+      const allLines = Array.from(outputElement.children);
+
+      for (const line of allLines) {
+        if (line === focusLine || line === anchorLine) {
+          if (!isBetween) {
+            isBetween = true;
+            idsToRemove.add(line.dataset['id']);
+            if (focusLine === anchorLine) break; 
+            continue;
+          } else {
+            idsToRemove.add(line.dataset['id']);
+            break;
+          }
+        }
+        if (isBetween) idsToRemove.add(line.dataset['id']);
+      }
+
+      const removedLines = currentParsedLines.filter(line => idsToRemove.has(line.id));
+      currentParsedLines = currentParsedLines.filter(line => !idsToRemove.has(line.id));
+
+      if (removedLines.length > 0) {
+        deletedLinesStack.push(removedLines);
+        updateUndoCounter();
+        // id → element Map으로 한 번에 조회 (querySelector 반복보다 빠름)
+        const lineMap = new Map(
+          Array.from(outputElement.children).map(el => [el.dataset['id'], el])
+        );
+        for (const id of idsToRemove) {
+          const el = lineMap.get(id);
+          if (el) el.remove();
+        }
+        dirtySaveAsAndTryUpdate();
+      }
+    }
+
+    function getLineElementFromSelectionNode(node) {
+      while (node && node.parentNode) {
+        if (node.classList?.contains('line')) return node;
+        node = node.parentNode;
+      }
+      return undefined;
+    }
+  })();
+  // =======================================================================
+// [추가 기능] 에디터별 맞춤 복사 시스템
+// =======================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // --- 플랫폼별 클립보드 커스텀 복사 로직 ---
+  function handleCopyForPlatform(platform) {
+    const targetOutput = document.getElementById('output') || (typeof outputElement !== 'undefined' ? outputElement : null);
+    if (!targetOutput) {
+      alert('출력 영역을 찾을 수 없습니다.');
+      return;
+    }
+
+    const selection = window.getSelection();
+    let selectedLines = [];
+    
+    // 사용자 마우스 드래그 영역 확인
+    if (selection && !selection.isCollapsed && targetOutput.contains(selection.commonAncestorContainer)) {
+      const allLines = Array.from(targetOutput.querySelectorAll('.line'));
+      allLines.forEach(line => {
+        if (selection.containsNode(line, true)) {
+          selectedLines.push(line);
+        }
+      });
+      if (selectedLines.length === 0) {
+        let node = selection.anchorNode;
+        while (node && node !== targetOutput) {
+          if (node.classList && node.classList.contains('line')) {
+            selectedLines.push(node);
+            break;
+          }
+          node = node.parentNode;
+        }
+      }
+    }
+    
+    // 선택 영역이 없으면 전체 복사
+    if (selectedLines.length === 0) {
+      selectedLines = Array.from(targetOutput.querySelectorAll('.line'));
+    }
+
+    if (selectedLines.length === 0) {
+      alert('복사할 데이터가 없습니다.');
+      return;
+    }
+
+    const classToColor = {};
+    if (typeof messageTypes !== 'undefined') {
+      Object.values(messageTypes).forEach(t => {
+        classToColor[t.class] = t.color;
+      });
+    }
+
+    const compactFlag = typeof isCompactMode !== 'undefined' ? isCompactMode : false;
+    let htmlResult = "";
+    let plainTextResult = "";
+
+    if (platform === 'gdocs') {
+      // 구글 문서: 개별 div 블록 마진 제어 구조
+      htmlResult = "<div>";
+      selectedLines.forEach(line => {
+        const clone = line.cloneNode(true);
+        const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
+        allEls.forEach(el => {
+          if (!el.classList) return;
+          if (el.classList.contains('sender')) el.style.fontWeight = 'bold';
+          for (const cls of Array.from(el.classList)) {
+            if (classToColor[cls]) el.style.color = classToColor[cls];
+          }
+        });
+
+        let marginStyle = "margin: 6px 0;";
+        if (compactFlag) {
+          if (clone.classList.contains('compact-same')) {
+            marginStyle = "margin: 1px 0;";
+          } else if (clone.classList.contains('compact-diff')) {
+            marginStyle = "margin-top: 10px; margin-bottom: 1px;";
+          }
+        }
+        htmlResult += `<div style="${marginStyle} font-family: Arial, sans-serif;">${clone.innerHTML}</div>`;
+        plainTextResult += line.textContent + "\n";
+      });
+      htmlResult += "</div>";
+    } else if (platform === 'upnote') {
+      // UpNote: 통합 단일 박스 및 내부 <br> 분기 구조 (벌어짐 방지)
+      htmlResult = "<div style='font-family: Arial, sans-serif;'>";
+      selectedLines.forEach((line, index) => {
+        const clone = line.cloneNode(true);
+        const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
+        allEls.forEach(el => {
+          if (!el.classList) return;
+          if (el.classList.contains('sender')) el.style.fontWeight = 'bold';
+          for (const cls of Array.from(el.classList)) {
+            if (classToColor[cls]) el.style.color = classToColor[cls];
+          }
+        });
+
+        if (index > 0) {
+          if (compactFlag && line.classList.contains('compact-same')) {
+            htmlResult += "<br>";
+          } else {
+            htmlResult += "<br><br>";
+          }
+        }
+        htmlResult += clone.innerHTML;
+        plainTextResult += line.textContent + "\n";
+      });
+      htmlResult += "</div>";
+    }
+
+    // 최신 Clipboard API 주입 시도
+    if (navigator.clipboard && navigator.clipboard.write) {
+      const htmlBlob = new Blob([htmlResult], { type: 'text/html' });
+      const plainBlob = new Blob([plainTextResult], { type: 'text/plain' });
+      navigator.clipboard.write([new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': plainBlob })])
+        .then(() => alert('양식이 유지되도록 클립보드에 복사되었습니다!'))
+        .catch(() => fallbackCopy(htmlResult, plainTextResult));
+    } else {
+      fallbackCopy(htmlResult, plainTextResult);
+    }
+  }
+
+  function fallbackCopy(htmlContent, plainTextContent) {
+    const listener = (e) => {
+      e.clipboardData.setData('text/html', htmlContent);
+      e.clipboardData.setData('text/plain', plainTextContent);
+      e.preventDefault();
+    };
+    document.addEventListener('copy', listener);
+    document.execCommand('copy');
+    document.removeEventListener('copy', listener);
+    alert('클립보드에 복사되었습니다.');
+  }
+});
+</script>
+</body>
+</html>
