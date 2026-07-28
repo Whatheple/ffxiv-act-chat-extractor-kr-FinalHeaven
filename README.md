@@ -1,6 +1,6 @@
 **FFXIV ACT CHAT EXTRACTOR KR**
 
-Nuusie's Final Fantasy XIV ACT Chat Extractor (https://github.com/saaratrix/nuu-ffxiv-act-chat-extractor/tree/main)의 코드를 Claude.ai를 통한 바이브 코딩으로 한국서버에 맞춰서+제가 편하게 쓰려고 수정했습니다.
+Nuusie's Final Fantasy XIV ACT Chat Extractor (https://github.com/saaratrix/nuu-ffxiv-act-chat-extractor/tree/main )의 코드를 Claude.ai를 통한 바이브 코딩으로 한국서버에 맞춰서+제가 편하게 쓰려고 수정했습니다.
 
 페이지 미리보기 : https://whatheple.github.io/ffxiv-act-chat-extractor-kr-FinalHeaven/
 
