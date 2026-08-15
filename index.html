@@ -670,19 +670,32 @@
       <a id="undo-btn" style="display: none; white-space: nowrap; cursor: pointer; font-weight: bold;">되돌리기 (0)</a>
     </div>
 
-    <!-- 채팅 HTML 저장하기 + 복사 포맷 고정 (나란히) -->
-    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: nowrap;">
-      <a class="save-as-html" style="cursor: pointer; font-weight: bold; white-space: nowrap;">채팅 HTML 저장하기</a>
-      <div style="display: flex; gap: 0.8rem; align-items: center; border: 1px solid var(--ff14-gold-dark); padding: 2px 8px; font-weight: bold; font-size: 0.95em; background: rgba(200,168,75,0.06);">
-        <span>복사 포맷 고정:</span>
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
-          <input type="radio" name="copy-target" value="upnote" checked> UpNote
-        </label>
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
-          <input type="radio" name="copy-target" value="gdocs"> 구글 문서
-        </label>
-      </div>
-    </div>
+<!-- 채팅 저장하기 [HTML] [TXT] + 복사 포맷 고정 (나란히) -->
+<div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: nowrap;">
+  <span style="font-weight: bold; white-space: nowrap; color: var(--ff14-text);">채팅 저장하기:</span>
+  <a class="save-as-html" style="cursor: pointer; font-weight: bold; white-space: nowrap;">HTML</a>
+  <button id="save-as-txt" style="font-weight: bold; white-space: nowrap;">TXT</button>
+
+  <span style="font-weight: bold; white-space: nowrap; color: var(--ff14-text); margin-left: 0.8rem;">복사 포맷 고정:</span>
+
+  <label style="cursor: pointer; display: flex; align-items: center; gap: 3px; font-weight: bold; white-space: nowrap;">
+    <input type="radio" name="copy-target" value="upnote" checked> UpNote
+  </label>
+
+  <label style="cursor: pointer; display: flex; align-items: center; gap: 3px; font-weight: bold; white-space: nowrap;">
+    <input type="radio" name="copy-target" value="gdocs"> 구글 문서
+  </label>
+
+  <label style="cursor: pointer; display: flex; align-items: center; gap: 3px; font-weight: bold; white-space: nowrap;">
+    <input type="radio" name="copy-target" value="notepad"> 메모장
+  </label>
+
+  <button id="copy-now-btn" style="font-weight: bold; white-space: nowrap; margin-left: 4px;">복사하기</button>
+
+  <label title="구글 문서에만 작동합니다" style="cursor: pointer; display: flex; align-items: center; gap: 3px; font-weight: bold; white-space: nowrap;">
+    <input type="checkbox" id="copy-keep-colors"> 컬러 유지
+  </label>
+</div>
 
     <div style="display: flex; gap: 0.5rem; align-items: center;">
       <input type="text" id="search-input" placeholder="검색 (Enter로 이동)">
@@ -739,13 +752,14 @@
       '001c': { code: '001c', class: 'emote-custom', name: '지정감정표현', color: '#888888', visible: true },
       '001d': { code: '001d', class: 'emote', name: '감정표현', color: '#888888', visible: true },
       '001e': { code: '001e', class: 'yell', name: '떠들기', color: '#c9c722', visible: true },
-      '003d': { code: '003d', class: 'npc', name: 'NPC 대사', color: '#c8a4e0', visible: false },
-      '0039': { code: '0039', class: 'system', name: '시스템 로그', color: '#abd4ff', visible: false },
       '000c': { code: '000c', class: 'tell-to', name: '보낸 귓속말', color: '#d439cc', prependSender: 'To ', suffixSender: '', visible: true },
       '000d': { code: '000d', class: 'tell-from', name: '받은 귓속말', color: '#d439cc', prependSender: 'From ', suffixSender: '', visible: true },
       '0038': { code: '0038', class: 'whisper', name: '혼잣말', color: '#d439cc', visible: true },
       '204a': { code: '204a', class: 'dice', name: '주사위', color: '#ffffaa', visible: true },
+      '003d': { code: '003d', class: 'npc', name: 'NPC 대사', color: '#c8a4e0', visible: false },
+      '0039': { code: '0039', class: 'system', name: '시스템 로그', color: '#abd4ff', visible: false },
       '0839': { code: '0839', class: 'loot', name: '획득/거래 로그', color: '#abd4ff', visible: true },
+      'etc':  { code: 'etc',  class: 'etc',  name: '기타',          color: '#aaaaaa', visible: false },
       '0010': { code: '0010', class: 'linkshell-1', name: '링크셸 1', color: '#31b56a', visible: true },
       '0011': { code: '0011', class: 'linkshell-2', name: '링크셸 2', color: '#2a8c9c', visible: true },
       '0012': { code: '0012', class: 'linkshell-3', name: '링크셸 3', color: '#296196', visible: true },
@@ -763,7 +777,10 @@
       '006a': { code: '006a', class: 'cw-linkshell-7', name: '서버 초월 링크셸 7', color: '#9eb76c', visible: true },
       '006b': { code: '006b', class: 'cw-linkshell-8', name: '서버 초월 링크셸 8', color: '#97b262', visible: true },
     };
-    const messageTypesAsArray = Object.values(messageTypes);
+    // 0044(NPC 다이얼로그), 0bb9(퀘스트 수락)은 003d(NPC 대사)와 같은 필터로 처리
+    messageTypes['0044'] = messageTypes['003d'];
+    messageTypes['0bb9'] = messageTypes['003d'];
+    const messageTypesAsArray = Object.values(messageTypes).filter((v, i, a) => a.indexOf(v) === i);
     const customSenderColours = [];
     const senders = [];
     const quotationRules = [
@@ -874,6 +891,28 @@
         radio.addEventListener('change', (e) => {
           localStorage.setItem('ffxiv-copy-target', e.target.value);
         });
+      });
+
+      document.getElementById('save-as-txt').addEventListener('click', () => {
+          const baseName = (logFilename || 'chat').replace(/\.(html|txt)$/i, '');
+          const inputName = prompt('저장할 파일명을 입력하세요:', baseName + '.txt');
+          if (inputName === null) return;
+          const finalName = inputName.trim() || baseName + '.txt';
+          const downloadName = finalName.endsWith('.txt') ? finalName : finalName + '.txt';
+          const blob = new Blob([getTXTOutput()], { type: 'text/plain;charset=utf-8' });
+          const url = window.URL.createObjectURL(blob);
+          const tempA = document.createElement('a');
+          tempA.href = url;
+          tempA.download = downloadName;
+          document.body.appendChild(tempA);
+          tempA.click();
+          document.body.removeChild(tempA);
+          window.URL.revokeObjectURL(url);
+        });
+
+      document.getElementById('copy-now-btn').addEventListener('click', () => {
+        const platform = document.querySelector('input[name="copy-target"]:checked')?.value || 'upnote';
+        handleCopyForPlatform(platform);
       });
 
       const searchInput = document.getElementById('search-input');
@@ -1029,15 +1068,12 @@
         saveAsHTMLAnchor.addEventListener('click', (e) => {
           e.preventDefault();
           if (isSaveAsDirty) generateSaveAsButtons();
-          // 현재 설정된 파일명을 기본값으로 입력창 표시
-          const currentName = saveAsHTMLAnchor.download || (logFilename + '.html');
-          const inputName = prompt('저장할 파일명을 입력하세요:', currentName);
-          if (inputName === null) return; // 취소
-          const finalName = inputName.trim() || currentName;
-          // 확장자 없으면 .html 추가
+          const baseName = (logFilename || 'chat').replace(/\.(html|txt)$/i, '');
+          const inputName = prompt('저장할 파일명을 입력하세요:', baseName + '.html');
+          if (inputName === null) return;
+          const finalName = inputName.trim() || baseName + '.html';
           const downloadName = finalName.endsWith('.html') ? finalName : finalName + '.html';
           saveAsHTMLAnchor.download = downloadName;
-          // 실제 다운로드 트리거
           const tempA = document.createElement('a');
           tempA.href = saveAsHTMLAnchor.href;
           tempA.download = downloadName;
@@ -1108,13 +1144,19 @@
     }
 
     // 서버 이름을 @포맷으로 반환하는 헬퍼 함수
-    function formatSenderNameForMenu(senderName) {
+    function formatSenderNameForMenu(sender) {
+      const senderName = typeof sender === 'string' ? sender : sender.name;
       const serverRegex = /(Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르)$/;
       const match = senderName.match(serverRegex);
-      if (!match) return senderName;
-      const serverName = match[0];
-      const characterName = senderName.replace(serverRegex, '');
-      return characterName + '@' + serverName;
+      let displayName;
+      if (match) {
+        const serverName = match[0];
+        const characterName = senderName.replace(serverRegex, '');
+        displayName = characterName + '@' + serverName;
+      } else {
+        displayName = senderName;
+      }
+      return (typeof sender === 'string' || !sender.isNPC) ? displayName : `(NPC) ${displayName}`;
     }
 
     function showFilterTypes() {
@@ -1174,7 +1216,7 @@
         senderElement.className = `filter-sender hover-highlight`;
         senderElement.innerHTML = `
           <input type="checkbox" class="hover-highlight">
-          <span>${formatSenderNameForMenu(sender.name)}</span>
+          <span>${formatSenderNameForMenu(sender)}</span>
           <span class="sender-count">${sender.count}</span>
         `;
         const inputElement = senderElement.querySelector('input');
@@ -1267,7 +1309,10 @@
 
     function getSortedSenders() {
       const sortedSenders = [...senders];
-      sortedSenders.sort((a, b) => a.name.localeCompare(b.name));
+      sortedSenders.sort((a, b) => {
+        if (!!a.isNPC !== !!b.isNPC) return a.isNPC ? 1 : -1;
+        return a.name.localeCompare(b.name);
+      });
       return sortedSenders;
     }
 
@@ -1305,7 +1350,7 @@
         senderColourElement.innerHTML = `
           <label>
             <input type="checkbox" >
-            <span>${formatSenderNameForMenu(sender.name)}</span>
+            <span>${formatSenderNameForMenu(sender)}</span>
           </label>
           <input type="color">
         `;
@@ -1362,7 +1407,7 @@
 
         // 원본 이름 라벨 — 현재 서버명 표시 설정을 따름
         const label = document.createElement('span');
-        label.textContent = getDisplaySenderName(sender.name);
+        label.textContent = formatSenderNameForMenu(sender);
         label.style.cssText = 'font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
 
         // 새 이름 입력칸
@@ -1845,7 +1890,19 @@
         item.id = index.toString();
         index++;
 
-        // 001d(감정표현): 메시지 맨 앞에 "sender+서버명+조사" 형태가 포함됨
+        // 0839: 획득/거래 패턴 4가지만 유지, 나머지는 기타로 분류
+        if (code === '0839') {
+          const lootPatterns = [
+            '를 받았습니다.',
+            '을 받았습니다.',
+            '소지품에 넣었습니다.',
+            '손에 넣었습니다.',
+          ];
+          const rawMsg = rawMessage;
+          if (!lootPatterns.some(p => rawMsg.endsWith(p))) {
+            item.code = 'etc';
+          }
+        }
         // → 서버명을 sender에 추가하고, 조사는 item.emoteJosa에 보관, 메시지에서 이름+조사 제거
         if (code === '001d' && item.sender) {
           const serverNames = 'Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르';
@@ -1903,8 +1960,12 @@
             visible: true,
             class: senderClass,
             customColor: '#ffffff',
+            isNPC: false,
           };
           senders.push(sender);
+        }
+        if (line.code === '003d' || line.code === '0044' || line.code === '0bb9') {
+          sender.isNPC = true;
         }
         line.senderReference = sender;
         sender.count++;
@@ -2315,8 +2376,39 @@
       existingObjectURLs.push(url);
     }
 
+    function getTXTOutput() {
+      const outputElement = document.getElementById('output');
+      const lines = Array.from(outputElement.querySelectorAll('.line'));
+      let text = '';
+      lines.forEach((line, index) => {
+        const time = line.querySelector('.time');
+        const sender = line.querySelector('.sender');
+        const message = line.querySelector('.message');
+        const parts = [];
+        if (time) parts.push(time.textContent.trim());
+        if (sender) parts.push(sender.textContent.trim());
+        if (message) parts.push(message.textContent.trim());
+
+        if (index > 0) {
+          if (isCompactMode && line.classList.contains('compact-same')) {
+            text += '\n';
+          } else if (isCompactMode) {
+            text += '\n\n';
+          } else {
+            text += '\n';
+          }
+        }
+        text += parts.join(' ');
+      });
+      return text + (lines.length ? '\n' : '');
+    }
+
     function getHTMLOutput(filename, content) {
       const css = createCSS();
+      const compactCSS = `
+.line.compact-same { margin: 0.1rem 0 !important; }
+.line.compact-diff { margin: 1rem 0 0.1rem 0 !important; }
+`;
       const output = `
 <html>
 <head>
@@ -2330,6 +2422,7 @@ body.white-mode #filter-popover { background-color: #222 !important; }
 body.white-mode #filter-popover label, body.white-mode #filter-popover span { color: #ffffff !important; }
 body.white-mode #filter-popover button { color: #000000 !important; background-color: #f0f0f0 !important; }
 body.white-mode .save-as-html { color: #000000 !important; }
+${compactCSS}
     ${css}
   </style>
 </head>
@@ -2405,9 +2498,8 @@ body.white-mode .save-as-html { color: #000000 !important; }
   // =======================================================================
 // [추가 기능] 에디터별 맞춤 복사 시스템
 // =======================================================================
-window.addEventListener('DOMContentLoaded', () => {
-  // --- 플랫폼별 클립보드 커스텀 복사 로직 ---
-  function handleCopyForPlatform(platform) {
+// --- 플랫폼별 클립보드 커스텀 복사 로직 ---
+function handleCopyForPlatform(platform) {
     const targetOutput = document.getElementById('output') || (typeof outputElement !== 'undefined' ? outputElement : null);
     if (!targetOutput) {
       alert('출력 영역을 찾을 수 없습니다.');
@@ -2459,37 +2551,71 @@ window.addEventListener('DOMContentLoaded', () => {
     let plainTextResult = "";
 
     if (platform === 'gdocs') {
-      // 구글 문서: 개별 div 블록 마진 제어 구조
-      htmlResult = "<div>";
-      selectedLines.forEach(line => {
-        const clone = line.cloneNode(true);
-        const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
-        allEls.forEach(el => {
-          if (!el.classList) return;
-          if (el.classList.contains('sender')) el.style.fontWeight = 'bold';
-          for (const cls of Array.from(el.classList)) {
-            if (classToColor[cls]) el.style.color = classToColor[cls];
-          }
-        });
+      // 구글 문서: 이름만 굵게, 대사는 일반 굵기.
+      // 같은 캐릭터는 붙이고, 캐릭터가 바뀌면 문단 간격을 둡니다.
+      htmlResult = "<div style=\"font-family: Arial, sans-serif;\">";
+      const keepColors = document.getElementById('copy-keep-colors')?.checked === true;
 
-        let marginStyle = "margin: 6px 0;";
-        if (compactFlag) {
-          if (clone.classList.contains('compact-same')) {
-            marginStyle = "margin: 1px 0;";
-          } else if (clone.classList.contains('compact-diff')) {
-            marginStyle = "margin-top: 10px; margin-bottom: 1px;";
+      selectedLines.forEach((line, index) => {
+        const senderEl = line.querySelector('.sender');
+        const messageEl = line.querySelector('.message');
+        const sender = senderEl?.textContent || "";
+        const message = messageEl?.textContent || "";
+
+        // 구글 문서에서도 실제 줄바꿈으로 같은/다른 캐릭터 간격을 표현
+        if (index > 0) {
+          if (line.classList.contains('compact-same')) {
+            htmlResult += "<br>";
+            plainTextResult += `\n`;
+          } else {
+            htmlResult += "<br><br>";
+            plainTextResult += `\n\n`;
           }
         }
-        htmlResult += `<div style="${marginStyle} font-family: Arial, sans-serif;">${clone.innerHTML}</div>`;
-        plainTextResult += line.textContent + "\n";
+
+        if (keepColors) {
+          // 현재 화면에 실제 적용되어 있는 색상을 그대로 읽어옵니다.
+          // 필터 타입 색상 + 캐릭터(발신자) 색상 + 현재 colorMode 결과를 모두 포함합니다.
+          const senderColor = senderEl ? getComputedStyle(senderEl).color : '';
+          const messageColor = messageEl ? getComputedStyle(messageEl).color : '';
+          htmlResult += `<span style="font-weight: bold; color: ${senderColor};">${sender}</span> <span style="font-weight: normal; color: ${messageColor};">${message}</span>`;
+        } else {
+          // 컬러 유지가 꺼져 있으면 기존 복사 방식 그대로
+          htmlResult += `<span style="font-weight: bold;">${sender}</span> <span style="font-weight: normal;">${message}</span>`;
+        }
+
+        plainTextResult += `${sender} ${message}`;
       });
       htmlResult += "</div>";
+    } else if (platform === 'notepad') {
+      // 메모장: 화면의 compact-same / compact-diff 상태를 그대로 평문으로 재현합니다.
+      // 각 줄의 "이름: 대사"는 절대 제거하지 않고, 줄 사이의 빈 줄만 제어합니다.
+      const notepadLines = [];
+      selectedLines.forEach((line, index) => {
+        const senderEl = line.querySelector('.sender');
+        const messageEl = line.querySelector('.message');
+        const sender = senderEl ? senderEl.textContent.trim() : '';
+        const message = messageEl ? messageEl.textContent.trim() : '';
+        const lineText = sender && message ? `${sender} ${message}` : (sender || message);
+
+        if (index > 0 && !(compactFlag && line.classList.contains('compact-same'))) {
+          // 같은 캐릭터 대사 붙여보기가 켜져 있고 compact-same이면 바로 이어 붙임.
+          // 캐릭터가 바뀌는 줄(compact-diff)에는 빈 줄 하나를 넣음.
+          notepadLines.push('');
+        }
+        notepadLines.push(lineText);
+      });
+      plainTextResult = notepadLines.join('\n');
+      htmlResult = plainTextResult;
     } else if (platform === 'upnote') {
       // UpNote: 통합 단일 박스 및 내부 <br> 분기 구조 (벌어짐 방지)
       htmlResult = "<div style='font-family: Arial, sans-serif;'>";
+      const keepColors = document.getElementById('copy-keep-colors')?.checked === true;
+
       selectedLines.forEach((line, index) => {
         const clone = line.cloneNode(true);
         const allEls = [clone, ...Array.from(clone.querySelectorAll('*'))];
+
         allEls.forEach(el => {
           if (!el.classList) return;
           if (el.classList.contains('sender')) el.style.fontWeight = 'bold';
@@ -2498,20 +2624,49 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         });
 
+        if (keepColors) {
+          // 기존 스타일을 덮어쓰지 않고, 현재 화면에서 계산된 색상을 복사합니다.
+          const originalEls = [line, ...Array.from(line.querySelectorAll('*'))];
+          originalEls.forEach((originalEl, i) => {
+            const clonedEl = allEls[i];
+            if (!clonedEl || !originalEl) return;
+            const color = getComputedStyle(originalEl).color;
+            if (color) clonedEl.style.color = color;
+          });
+        } else {
+          // 컬러 유지가 꺼져 있으면 기존 방식 그대로입니다.
+          // (클래스 기반 색상 적용 포함)
+        }
+
         if (index > 0) {
-          if (compactFlag && line.classList.contains('compact-same')) {
+          if (line.classList.contains('compact-same')) {
             htmlResult += "<br>";
+            plainTextResult += "\n";
           } else {
             htmlResult += "<br><br>";
+            plainTextResult += "\n\n";
           }
         }
         htmlResult += clone.innerHTML;
-        plainTextResult += line.textContent + "\n";
+        plainTextResult += line.textContent;
       });
       htmlResult += "</div>";
     }
 
-    // 최신 Clipboard API 주입 시도
+    // 메모장은 일반적인 순수 텍스트 복사 방식을 사용
+    if (platform === 'notepad') {
+      const textForNotepad = plainTextResult.replace(/\r?\n/g, '\r\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textForNotepad)
+          .then(() => alert('메모장용 텍스트가 클립보드에 복사되었습니다!'))
+          .catch(() => fallbackPlainTextCopy(textForNotepad));
+      } else {
+        fallbackPlainTextCopy(textForNotepad);
+      }
+      return;
+    }
+
+    // 기존 UpNote / 구글 문서 복사 방식은 그대로 유지
     if (navigator.clipboard && navigator.clipboard.write) {
       const htmlBlob = new Blob([htmlResult], { type: 'text/html' });
       const plainBlob = new Blob([plainTextResult], { type: 'text/plain' });
@@ -2523,18 +2678,33 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function fallbackCopy(htmlContent, plainTextContent) {
-    const listener = (e) => {
-      e.clipboardData.setData('text/html', htmlContent);
-      e.clipboardData.setData('text/plain', plainTextContent);
-      e.preventDefault();
-    };
-    document.addEventListener('copy', listener);
+function fallbackCopy(htmlContent, plainTextContent) {
+  const listener = (e) => {
+    e.clipboardData.setData('text/html', htmlContent);
+    e.clipboardData.setData('text/plain', plainTextContent);
+    e.preventDefault();
+  };
+  document.addEventListener('copy', listener);
+  document.execCommand('copy');
+  document.removeEventListener('copy', listener);
+  alert('클립보드에 복사되었습니다.');
+}
+
+function fallbackPlainTextCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
     document.execCommand('copy');
-    document.removeEventListener('copy', listener);
-    alert('클립보드에 복사되었습니다.');
+    alert('메모장용 텍스트가 클립보드에 복사되었습니다!');
+  } finally {
+    document.body.removeChild(textarea);
   }
-});
+}
 </script>
 </body>
 </html>
