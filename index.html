@@ -14,7 +14,7 @@
       --color-dark-highlight-hsl: hsl(0, 0%, 15%);
       --color-width: 20px;
 
-      /* FF14 테마 변수 */
+      /* FF14 테마 변수 (어둠 테마 = 기본값) */
       --ff14-gold: #c8a84b;
       --ff14-gold-light: #e8d08a;
       --ff14-gold-dark: #8a6f2e;
@@ -24,6 +24,90 @@
       --ff14-border: #c8a84b;
       --ff14-text: #e8dfc8;
       --ff14-text-dim: #a09070;
+
+      /* 테마 전환용 확장 변수 (버튼/패널/스크롤바 등 세부 그라데이션) */
+      --theme-accent-rgb: 200, 168, 75;
+      --theme-body-bg: #0d0d0d;
+      --theme-body-text: #d0c8b0;
+      --theme-scroll-track: #0e0c08;
+      --theme-scroll-track-border: #2a2010;
+      --theme-scroll-thumb-grad: linear-gradient(180deg, #8a6f2e 0%, #c8a84b 50%, #8a6f2e 100%);
+      --theme-scroll-thumb-hover-grad: linear-gradient(180deg, #c8a84b 0%, #e8d08a 50%, #c8a84b 100%);
+      --theme-toolbar-grad: linear-gradient(180deg, #1e1a12 0%, #0e0c08 100%);
+      --theme-button-grad: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+      --theme-button-hover-grad: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+      --theme-button-active-grad: linear-gradient(180deg, #1a1510 0%, #0e0c08 100%);
+      --theme-popover-grad: linear-gradient(160deg, #1e1a12 0%, #0e0c08 100%);
+      --theme-panel-grad: linear-gradient(160deg, #1a1610 0%, #0e0c08 100%);
+      --theme-panel-glow: #0a0806;
+      --theme-input-bg: rgba(10, 8, 5, 0.8);
+      --theme-color-input-bg: #0e0c08;
+      /* 패널 배경 위에 직접 얹히는 강조 텍스트(헤더/링크) 전용 — 밝은 배경 테마에서 본문 텍스트와 별도로 필요 */
+      --theme-panel-accent-text: #e8d08a;
+    }
+
+    html.theme-classic {
+      /* 고전 테마 (파판 파판 견본 스타일: 인디고/보라 바탕 + 페리윙클 블루 강조) */
+      /* html 요소에 지정해야 html::-webkit-scrollbar-* (페이지 스크롤바)도 변수를 상속받음 */
+      --ff14-gold: #8ea4ff;
+      --ff14-gold-light: #d0d8ff;
+      --ff14-gold-dark: #4d3fc2;
+      --ff14-bg: #2700a0;
+      --ff14-bg-panel: rgba(21, 10, 74, 0.97);
+      --ff14-bg-hover: rgba(100, 131, 252, 0.18);
+      --ff14-border: #8ea4ff;
+      --ff14-text: #eef0ff;
+      --ff14-text-dim: #b3b0e0;
+
+      --theme-accent-rgb: 100, 131, 252;
+      --theme-body-bg: #150a4a;
+      --theme-body-text: #eef0ff;
+      --theme-scroll-track: #0d0633;
+      --theme-scroll-track-border: #241269;
+      --theme-scroll-thumb-grad: linear-gradient(180deg, #4d3fc2 0%, #6483fc 50%, #4d3fc2 100%);
+      --theme-scroll-thumb-hover-grad: linear-gradient(180deg, #6483fc 0%, #d0d8ff 50%, #6483fc 100%);
+      --theme-toolbar-grad: linear-gradient(180deg, #241269 0%, #0d0633 100%);
+      --theme-button-grad: linear-gradient(180deg, #4a3fc0 0%, #241269 100%);
+      --theme-button-hover-grad: linear-gradient(180deg, #6483fc 0%, #4a3fc0 100%);
+      --theme-button-active-grad: linear-gradient(180deg, #241269 0%, #0d0633 100%);
+      --theme-popover-grad: linear-gradient(160deg, #241269 0%, #0d0633 100%);
+      --theme-panel-grad: linear-gradient(160deg, #2700a0 0%, #150a4a 100%);
+      --theme-panel-glow: #0d0633;
+      --theme-input-bg: rgba(13, 6, 51, 0.8);
+      --theme-color-input-bg: #0d0633;
+      --theme-panel-accent-text: #d0d8ff;
+    }
+
+    html.theme-light {
+      /* 빛 테마 (양피지/가죽 견본 스타일: 크림색 파치먼트 바탕 + 어두운 갈색 탭/버튼 강조) */
+      --ff14-gold: #8a6a45;
+      --ff14-gold-light: #f7ecd8;
+      --ff14-gold-dark: #5a4530;
+      --ff14-bg: #f0d8b0;
+      --ff14-bg-panel: rgba(247, 221, 184, 0.97);
+      --ff14-bg-hover: rgba(138, 106, 69, 0.14);
+      --ff14-border: #8a6a45;
+      --ff14-text: #3c2a1f;
+      --ff14-text-dim: #7a6248;
+
+      --theme-accent-rgb: 138, 106, 69;
+      --theme-body-bg: #f0d8b0;
+      --theme-body-text: #3c2a1f;
+      --theme-scroll-track: #d9bd8f;
+      --theme-scroll-track-border: #8a6a45;
+      --theme-scroll-thumb-grad: linear-gradient(180deg, #6b4e34 0%, #8a6a45 50%, #6b4e34 100%);
+      --theme-scroll-thumb-hover-grad: linear-gradient(180deg, #8a6a45 0%, #c9a468 50%, #8a6a45 100%);
+      --theme-toolbar-grad: linear-gradient(180deg, #f5d9ac 0%, #ecd0a0 100%);
+      --theme-button-grad: linear-gradient(180deg, #8a6a4a 0%, #6b4e34 100%);
+      --theme-button-hover-grad: linear-gradient(180deg, #a3835c 0%, #7a5d40 100%);
+      --theme-button-active-grad: linear-gradient(180deg, #5a4530 0%, #4a3520 100%);
+      --theme-popover-grad: linear-gradient(160deg, #f7ddb8 0%, #ecd0a0 100%);
+      --theme-panel-grad: linear-gradient(160deg, #f7ddb8 0%, #ecd0a0 100%);
+      --theme-panel-glow: #c9a468;
+      --theme-input-bg: rgba(255, 250, 240, 0.85);
+      --theme-color-input-bg: #ecd0a0;
+      /* 파치먼트(밝은) 배경 위 헤더/링크용 — 흰색 대신 진한 갈색으로 가독성 확보 */
+      --theme-panel-accent-text: #6b4e34;
     }
 
     a {
@@ -216,23 +300,23 @@
       height: 24px;
     }
     html::-webkit-scrollbar-track {
-      background: #0e0c08;
-      border-left: 1px solid #2a2010;
+      background: var(--theme-scroll-track);
+      border-left: 1px solid var(--theme-scroll-track-border);
     }
     html::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #8a6f2e 0%, #c8a84b 50%, #8a6f2e 100%);
+      background: var(--theme-scroll-thumb-grad);
       border-radius: 0;
     }
     html::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #c8a84b 0%, #e8d08a 50%, #c8a84b 100%);
+      background: var(--theme-scroll-thumb-hover-grad);
     }
     html::-webkit-scrollbar-corner {
-      background: #0e0c08;
+      background: var(--theme-scroll-track);
     }
     /* Firefox: auto여야 width 지정이 의미있음 (thin은 브라우저 고정값) */
     html {
       scrollbar-width: auto;
-      scrollbar-color: #8a6f2e #0e0c08;
+      scrollbar-color: var(--ff14-gold-dark) var(--theme-scroll-track);
     }
 
     /* 팝오버 내부 스크롤바는 작게 */
@@ -241,23 +325,23 @@
       height: 5px;
     }
     #filter-popover::-webkit-scrollbar-track {
-      background: #0e0c08;
+      background: var(--theme-scroll-track);
     }
     #filter-popover::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #8a6f2e 0%, #c8a84b 50%, #8a6f2e 100%);
+      background: var(--theme-scroll-thumb-grad);
     }
     #filter-popover {
       scrollbar-width: thin;
-      scrollbar-color: #8a6f2e #0e0c08;
+      scrollbar-color: var(--ff14-gold-dark) var(--theme-scroll-track);
     }
 
     body.white-mode html { scrollbar-color: #c8a84b #ece4d0; }
     body.white-mode html::-webkit-scrollbar-track { background: #ece4d0; border-left: 1px solid #c8a84b; }
     body.white-mode html::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #c8a84b 0%, #e8d08a 50%, #c8a84b 100%); }
     .sticky-toolbar {
-      background: linear-gradient(180deg, #1e1a12 0%, #0e0c08 100%) !important;
+      background: var(--theme-toolbar-grad) !important;
       border-bottom: 1px solid var(--ff14-gold-dark);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(200,168,75,0.15);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(var(--theme-accent-rgb),0.15);
       padding: 6px 10px !important;
       gap: 0.6rem !important;
     }
@@ -265,8 +349,8 @@
     /* 툴바 버튼 공통 — .filter button 대신 구체 클래스로 한정 */
     .sticky-toolbar button:not(.popover-close-button),
     .filter-types, .filter-senders, .sender-colours,
-    .name-rename, .chat-settings, .filter-time {
-      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+    .name-rename, .chat-settings, .filter-time, .theme-settings {
+      background: var(--theme-button-grad);
       color: var(--ff14-gold-light);
       border: 1px solid var(--ff14-gold-dark);
       padding: 3px 10px;
@@ -281,23 +365,23 @@
 
     .sticky-toolbar button:not(.popover-close-button):hover,
     .filter-types:hover, .filter-senders:hover, .sender-colours:hover,
-    .name-rename:hover, .chat-settings:hover, .filter-time:hover {
-      background: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+    .name-rename:hover, .chat-settings:hover, .filter-time:hover, .theme-settings:hover {
+      background: var(--theme-button-hover-grad);
       border-color: var(--ff14-gold);
       color: var(--ff14-gold-light);
-      box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 0 8px rgba(200,168,75,0.08);
+      box-shadow: 0 0 6px rgba(var(--theme-accent-rgb),0.3), inset 0 0 8px rgba(var(--theme-accent-rgb),0.08);
     }
 
     .sticky-toolbar button:not(.popover-close-button):active,
     .filter-types:active, .filter-senders:active, .sender-colours:active,
-    .name-rename:active, .chat-settings:active, .filter-time:active {
-      background: linear-gradient(180deg, #1a1510 0%, #0e0c08 100%);
+    .name-rename:active, .chat-settings:active, .filter-time:active, .theme-settings:active {
+      background: var(--theme-button-active-grad);
       box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
     }
 
     /* 저장하기 링크를 버튼처럼 */
     .save-as-html {
-      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%) !important;
+      background: var(--theme-button-grad) !important;
       color: var(--ff14-gold-light) !important;
       border: 1px solid var(--ff14-gold-dark) !important;
       padding: 3px 10px !important;
@@ -305,21 +389,21 @@
       transition: background 0.15s, border-color 0.15s !important;
     }
     .save-as-html:hover {
-      background: linear-gradient(180deg, #3a3020 0%, #252010 100%) !important;
+      background: var(--theme-button-hover-grad) !important;
       border-color: var(--ff14-gold) !important;
-      box-shadow: 0 0 6px rgba(200,168,75,0.3) !important;
+      box-shadow: 0 0 6px rgba(var(--theme-accent-rgb),0.3) !important;
     }
 
     /* 되돌리기 링크 */
     #undo-btn {
-      color: var(--ff14-gold-light) !important;
+      color: var(--theme-panel-accent-text) !important;
       font-size: 0.82em;
     }
     #undo-btn:hover { color: var(--ff14-gold) !important; }
 
     /* 검색 입력 */
     #search-input {
-      background: rgba(10, 8, 5, 0.8) !important;
+      background: var(--theme-input-bg) !important;
       color: var(--ff14-text) !important;
       border: 1px solid var(--ff14-gold-dark) !important;
       border-radius: 0 !important;
@@ -330,7 +414,7 @@
     }
     #search-input:focus {
       border-color: var(--ff14-gold) !important;
-      box-shadow: 0 0 5px rgba(200,168,75,0.25);
+      box-shadow: 0 0 5px rgba(var(--theme-accent-rgb),0.25);
     }
     #search-input::placeholder { color: var(--ff14-text-dim); }
     #search-counter { color: var(--ff14-text-dim); font-size: 0.8em; }
@@ -342,9 +426,9 @@
 
     /* 팝오버 FF14 스타일 — position:fixed는 기존 규칙(line 53)에서 유지 */
     #filter-popover {
-      background: linear-gradient(160deg, #1e1a12 0%, #0e0c08 100%) !important;
+      background: var(--theme-popover-grad) !important;
       border: 1px solid var(--ff14-gold-dark) !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(200,168,75,0.07) !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(var(--theme-accent-rgb),0.07) !important;
       font-size: 0.96em;
     }
 
@@ -403,7 +487,7 @@
       }
       .filter { flex-wrap: wrap !important; max-width: 100% !important; }
       .filter-types, .filter-senders, .sender-colours,
-      .name-rename, .chat-settings, .filter-time {
+      .name-rename, .chat-settings, .filter-time, .theme-settings {
         font-size: 0.75em !important;
         padding: 3px 6px !important;
       }
@@ -419,8 +503,8 @@
 
     /* ── FF14: body 기본 ── */
     body {
-      background-color: #0d0d0d;
-      color: #d0c8b0;
+      background-color: var(--theme-body-bg);
+      color: var(--theme-body-text);
       font-family: 'Segoe UI', 'Meiryo', 'Noto Sans KR', sans-serif;
       /* 창 너비에 비례해 폰트 크기 자동 조정: 300px에서 12px ~ 1200px에서 16px */
       font-size: clamp(12px, 1vw + 11px, 16px);
@@ -429,10 +513,10 @@
     /* ── 로그 파서 영역 ── */
     .log-parser {
       padding: 6px 10px;
-      background: linear-gradient(160deg, #1a1610 0%, #0e0c08 100%);
+      background: var(--theme-panel-grad);
       border: 1px solid var(--ff14-gold-dark);
       margin: 12px;
-      box-shadow: 0 0 0 1px #0a0806, 0 4px 20px rgba(0,0,0,0.7);
+      box-shadow: 0 0 0 1px var(--theme-panel-glow), 0 4px 20px rgba(0,0,0,0.7);
       position: relative;
     }
     /* 모서리 장식 */
@@ -448,10 +532,10 @@
     .log-parser::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
 
     .log-parser h1 {
-      color: var(--ff14-gold-light);
+      color: var(--theme-panel-accent-text);
       font-size: 1em;
       letter-spacing: 0.05em;
-      text-shadow: 0 0 8px rgba(200,168,75,0.4);
+      text-shadow: 0 0 8px rgba(var(--theme-accent-rgb),0.4);
       border-bottom: 1px solid var(--ff14-gold-dark);
       padding-bottom: 6px;
       margin-bottom: 8px !important;
@@ -464,7 +548,7 @@
 
     /* ── 파일 입력 버튼 ── */
     #loginput {
-      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+      background: var(--theme-button-grad);
       color: var(--ff14-gold-light);
       border: 1px solid var(--ff14-gold-dark);
       padding: 4px 12px;
@@ -472,7 +556,7 @@
       cursor: pointer;
     }
     #loginput:hover {
-      background: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+      background: var(--theme-button-hover-grad);
       border-color: var(--ff14-gold);
     }
     #loginput::file-selector-button {
@@ -489,9 +573,9 @@
 
     /* ── 툴바 인라인 스타일 override ── */
     .sticky-toolbar {
-      background: linear-gradient(180deg, #1e1a12 0%, #0e0c08 100%) !important;
+      background: var(--theme-toolbar-grad) !important;
       border-bottom: 1px solid var(--ff14-gold-dark) !important;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 1px 0 rgba(200,168,75,0.08) !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 1px 0 rgba(var(--theme-accent-rgb),0.08) !important;
       padding: 6px 12px !important;
     }
 
@@ -515,18 +599,18 @@
       transition: background 0.1s;
     }
     .line:hover {
-      background: rgba(200, 168, 75, 0.05);
+      background: rgba(var(--theme-accent-rgb), 0.05);
       border-left-color: var(--ff14-gold-dark);
     }
 
     /* ── 검색 하이라이트 ── */
     .search-hit-line {
-      background-color: rgba(200, 168, 75, 0.12) !important;
+      background-color: rgba(var(--theme-accent-rgb), 0.12) !important;
       border-left-color: var(--ff14-gold) !important;
     }
     .search-hit-word {
-      background: rgba(200, 168, 75, 0.35);
-      color: var(--ff14-gold-light);
+      background: rgba(var(--theme-accent-rgb), 0.35);
+      color: var(--theme-panel-accent-text);
       border-radius: 2px;
       padding: 0 1px;
     }
@@ -544,7 +628,7 @@
 
     /* ── 팝오버 닫기 버튼 ── */
     .popover-close-button {
-      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%) !important;
+      background: var(--theme-button-grad) !important;
       color: var(--ff14-gold-light) !important;
       border: 1px solid var(--ff14-gold-dark) !important;
       width: 100%;
@@ -553,13 +637,75 @@
       letter-spacing: 0.1em;
     }
     .popover-close-button:hover {
-      background: linear-gradient(180deg, #3a3020 0%, #252010 100%) !important;
+      background: var(--theme-button-hover-grad) !important;
       border-color: var(--ff14-gold) !important;
+    }
+
+    /* ── 테마 선택 버튼 (현재 활성 테마와 무관하게 각자의 테마 색상으로 고정) ── */
+    .theme-select-btn {
+      display: block;
+      width: 100%;
+      padding: 6px 0;
+      margin-bottom: 6px;
+      font-size: 0.9em;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .theme-select-btn:last-child { margin-bottom: 0; }
+
+    /* 어둠 테마 버튼: 검은색/갈색/옅은 노란색 고정 */
+    #theme-dark-btn {
+      background: linear-gradient(180deg, #2a2318 0%, #1a1510 100%);
+      color: #e8d08a;
+      border: 1px solid #8a6f2e;
+    }
+    #theme-dark-btn:hover {
+      background: linear-gradient(180deg, #3a3020 0%, #252010 100%);
+      border-color: #c8a84b;
+      box-shadow: 0 0 6px rgba(200,168,75,0.3);
+    }
+    #theme-dark-btn.active {
+      border-color: #c8a84b;
+      box-shadow: inset 0 0 0 1px #c8a84b, 0 0 8px rgba(200,168,75,0.35);
+    }
+
+    /* 고전 테마 버튼: 인디고/페리윙클 블루 고정 */
+    #theme-classic-btn {
+      background: linear-gradient(180deg, #4a3fc0 0%, #241269 100%);
+      color: #d0d8ff;
+      border: 1px solid #4d3fc2;
+    }
+    #theme-classic-btn:hover {
+      background: linear-gradient(180deg, #6483fc 0%, #4a3fc0 100%);
+      border-color: #8ea4ff;
+      box-shadow: 0 0 6px rgba(100,131,252,0.3);
+    }
+    #theme-classic-btn.active {
+      border-color: #8ea4ff;
+      box-shadow: inset 0 0 0 1px #8ea4ff, 0 0 8px rgba(100,131,252,0.35);
+    }
+
+    /* 빛 테마 버튼: 파치먼트/진한 갈색 고정 */
+    #theme-light-btn {
+      background: linear-gradient(180deg, #8a6a4a 0%, #6b4e34 100%);
+      color: #f7ecd8;
+      border: 1px solid #5a4530;
+    }
+    #theme-light-btn:hover {
+      background: linear-gradient(180deg, #a3835c 0%, #7a5d40 100%);
+      border-color: #c9a468;
+      box-shadow: 0 0 6px rgba(138,106,69,0.4);
+    }
+    #theme-light-btn.active {
+      border-color: #c9a468;
+      box-shadow: inset 0 0 0 1px #c9a468, 0 0 8px rgba(138,106,69,0.45);
     }
 
     /* ── 팝오버 내 color input ── */
     #filter-popover input[type="color"] {
-      background: #0e0c08;
+      background: var(--theme-color-input-bg);
       border: 1px solid var(--ff14-gold-dark);
       width: 36px; height: 22px;
       padding: 1px;
@@ -569,7 +715,7 @@
     #filter-popover input[type="text"],
     #filter-popover input[type="number"],
     #filter-popover input[type="time"] {
-      background: rgba(10,8,5,0.8);
+      background: var(--theme-input-bg);
       color: var(--ff14-text);
       border: 1px solid var(--ff14-gold-dark);
       padding: 2px 6px;
@@ -581,7 +727,7 @@
     #filter-popover input[type="number"]:focus,
     #filter-popover input[type="time"]:focus {
       border-color: var(--ff14-gold);
-      box-shadow: 0 0 4px rgba(200,168,75,0.2);
+      box-shadow: 0 0 4px rgba(var(--theme-accent-rgb),0.2);
     }
 
     /* 시계 아이콘 색상 — 어두운 배경에서 보이도록 */
@@ -593,10 +739,14 @@
     #filter-popover input[type="time"]::-webkit-calendar-picker-indicator:hover {
       opacity: 1;
     }
+    /* 빛 테마는 입력창이 밝은색이라 반대로 아이콘을 어둡게 유지 */
+    html.theme-light #filter-popover input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(30%) sepia(40%) saturate(500%) hue-rotate(345deg) brightness(90%);
+    }
 
     /* ── 이름변경 팝오버 입력칸 ── */
     #filter-popover input[type="text"][placeholder="새 이름"] {
-      background: rgba(10,8,5,0.8);
+      background: var(--theme-input-bg);
       border: 1px solid var(--ff14-gold-dark);
       color: var(--ff14-text);
     }
@@ -610,7 +760,8 @@
     body.white-mode .sticky-toolbar button:not(.popover-close-button),
     body.white-mode .filter-types, body.white-mode .filter-senders,
     body.white-mode .sender-colours, body.white-mode .name-rename,
-    body.white-mode .chat-settings, body.white-mode .filter-time {
+    body.white-mode .chat-settings, body.white-mode .filter-time,
+    body.white-mode .theme-settings {
       background: linear-gradient(180deg, #f5f0e8 0%, #e8dfc8 100%);
       color: #5a4010;
       border-color: #c8a84b;
@@ -618,7 +769,8 @@
     body.white-mode .sticky-toolbar button:not(.popover-close-button):hover,
     body.white-mode .filter-types:hover, body.white-mode .filter-senders:hover,
     body.white-mode .sender-colours:hover, body.white-mode .name-rename:hover,
-    body.white-mode .chat-settings:hover, body.white-mode .filter-time:hover {
+    body.white-mode .chat-settings:hover, body.white-mode .filter-time:hover,
+    body.white-mode .theme-settings:hover {
       background: linear-gradient(180deg, #fffdf0 0%, #f5efd5 100%);
     }
     body.white-mode .save-as-html {
@@ -658,7 +810,7 @@
        target="_blank"
        title="original code: Nuusie's Final Fantasy XIV ACT Chat Extractor"
        style="margin-left: 12px; white-space: nowrap; color: var(--ff14-gold-dark); font-size: 0.85em; text-decoration: none; flex-shrink: 0; font-family: monospace;"
-       onmouseover="this.style.color='var(--ff14-gold-light)'"
+       onmouseover="this.style.color='var(--theme-panel-accent-text)'"
        onmouseout="this.style.color='var(--ff14-gold-dark)'">&lt;/&gt;</a>
   </div>
   <p id="error" style="margin: 0; padding: 0;"></p>
@@ -710,6 +862,7 @@
       <button class="name-rename">이름 변경</button>
       <button class="chat-settings">채팅 설정</button>
       <button class="filter-time">시간 필터링</button>
+      <button class="theme-settings">테마 설정</button>
       <div id="filter-popover" style="display: none;">
         <button class="popover-close-button">닫기</button>
         <div class="filter-popover-content"></div>
@@ -745,13 +898,13 @@
     let currentParsedLines = [];
     const messageTypes = {
       '000a': { code: '000a', class: 'say', name: '말하기', color: '#ffffff', visible: true },
+      '001e': { code: '001e', class: 'yell', name: '떠들기', color: '#c9c722', visible: true },
       '000b': { code: '000b', class: 'shout', name: '외치기', color: '#eb9234', visible: true },
       '000e': { code: '000e', class: 'party', name: '파티', color: '#1ecce3', visible: true },
       '000f': { code: '000f', class: 'alliance', name: '연합 파티', color: '#eb9234', visible: true },
       '0018': { code: '0018', class: 'free', name: '자유부대', color: '#54b068', visible: true },
       '001c': { code: '001c', class: 'emote-custom', name: '지정감정표현', color: '#888888', visible: true },
       '001d': { code: '001d', class: 'emote', name: '감정표현', color: '#888888', visible: true },
-      '001e': { code: '001e', class: 'yell', name: '떠들기', color: '#c9c722', visible: true },
       '000c': { code: '000c', class: 'tell-to', name: '보낸 귓속말', color: '#d439cc', prependSender: 'To ', suffixSender: '', visible: true },
       '000d': { code: '000d', class: 'tell-from', name: '받은 귓속말', color: '#d439cc', prependSender: 'From ', suffixSender: '', visible: true },
       '0038': { code: '0038', class: 'whisper', name: '혼잣말', color: '#d439cc', visible: true },
@@ -781,6 +934,11 @@
     messageTypes['0044'] = messageTypes['003d'];
     messageTypes['0bb9'] = messageTypes['003d'];
     const messageTypesAsArray = Object.values(messageTypes).filter((v, i, a) => a.indexOf(v) === i);
+    // 빛 테마에서 기본 컬러를 진하게 바꾸되, 사용자가 직접 고른 색은 건드리지 않기 위한 원본/커스텀 여부 기록
+    for (const mt of messageTypesAsArray) {
+      mt.baseColor = mt.color;
+      mt.customized = false;
+    }
     const customSenderColours = [];
     const senders = [];
     const quotationRules = [
@@ -817,13 +975,19 @@
       nameRename: '.name-rename',
       chatSettings: '.chat-settings',
       filterTime: '.filter-time',
+      themeSettings: '.theme-settings',
     }
     let lastPopoverOpener = '';
     let logFilename = '';
     let existingObjectURLs = [];
-    const nameReplacements = {}; // { 원본이름: { newName, active } }
+    const nameReplacements = {}; // { 정규화된 캐릭터 이름: { newName, active } }
+    // 발신자별 표시여부/커스텀 색상 — nameReplacements와 동일하게 이름 기준으로 세션/로그를 넘나들며 누적됨
+    const senderPreferences = {}; // { 원본이름: { visible, customColor, colorEnabled } }
 
     window.addEventListener('DOMContentLoaded', () => {
+      // 저장된 필터 타입/발신자 색상/이름 변경 등 사용자 설정 복원 (테마 적용보다 먼저)
+      loadUserSettings();
+
       const logInput = document.getElementById('loginput');
       errorElement = document.getElementById('error');
       const filterRootElement = document.querySelector('.filter');
@@ -834,6 +998,11 @@
       filterRootElement.querySelector('.name-rename').addEventListener('click', showNameRename);
       filterRootElement.querySelector('.chat-settings').addEventListener('click', showChatSettings);
       filterRootElement.querySelector('.filter-time').addEventListener('click', showFilterTime);
+      filterRootElement.querySelector('.theme-settings').addEventListener('click', showThemeSettings);
+
+      // 저장된 UI 테마 적용 (기본값: 어둠 테마)
+      const savedUiTheme = localStorage.getItem('ffxiv-ui-theme') || 'dark';
+      applyUiTheme(savedUiTheme);
 
       filterPopoverElement = document.getElementById('filter-popover');
       filterPopoverElement.querySelector('.popover-close-button').addEventListener('click', closeFilterPopover);
@@ -1096,10 +1265,205 @@
       updateColours();
     }
 
+    function resetBgColor() {
+      // 배경색 직접 지정만 초기화하고 현재 UI 테마의 기본 배경/텍스트 색상을 복원
+      document.body.style.backgroundColor = '';
+      document.body.style.color = '';
+      messageTypes['000a'].color = messageTypes['000a'].baseColor;
+      updateColours();
+    }
+
     function rgbToHex(rgb) {
       const m = rgb.match(/\d+/g);
       if (!m || m.length < 3) return '#0d0d0d';
       return '#' + m.slice(0, 3).map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+    }
+
+    // ── 로컬 저장 + 내보내기/불러오기: 필터 타입/발신자 색상/이름 변경 등 사용자 설정 ──
+    // (시간 필터·검색어 등 로그별 임시 상태는 저장 대상에서 제외)
+    const USER_SETTINGS_KEY = 'ffxiv-user-settings';
+
+    function buildFullSettingsPayload() {
+      const mt = {};
+      for (const t of messageTypesAsArray) {
+        mt[t.code] = { visible: t.visible, color: t.color, customized: !!t.customized };
+      }
+      return {
+        version: 1,
+        messageTypes: mt,
+        // senderPreferences/nameReplacements는 이름 기준으로 계속 누적되는 저장소이므로 그대로 사용 —
+        // 현재 불러온 로그에 없는 발신자의 설정도 내보내기에 함께 포함됨
+        senderPrefs: senderPreferences,
+        nameReplacements,
+        transformRules: transformTextRules.map(r => r.active),
+        isCompactMode, showTimestamp, showServerName, hideNameIcons,
+        colorMode, colorModeForTypes, colorModeForSenders,
+        bgColor: document.body.style.backgroundColor ? rgbToHex(document.body.style.backgroundColor) : null,
+        uiTheme: getCurrentUiTheme(),
+        copyTarget: localStorage.getItem('ffxiv-copy-target') || 'upnote',
+      };
+    }
+
+    // saved 객체의 값들을 현재 상태에 "병합" 적용 (기존에 없던 항목은 유지, 겹치는 항목만 덮어씀)
+    function applySettingsPayload(saved) {
+      if (!saved || typeof saved !== 'object') return;
+
+      if (saved.messageTypes && typeof saved.messageTypes === 'object') {
+        for (const code in saved.messageTypes) {
+          const t = messageTypes[code];
+          const s = saved.messageTypes[code];
+          if (!t || !s) continue;
+          if (typeof s.visible === 'boolean') t.visible = s.visible;
+          if (typeof s.color === 'string') t.color = s.color;
+          if (typeof s.customized === 'boolean') t.customized = s.customized;
+        }
+      }
+      if (saved.senderPrefs && typeof saved.senderPrefs === 'object') {
+        for (const name in saved.senderPrefs) {
+          senderPreferences[name] = { ...senderPreferences[name], ...saved.senderPrefs[name] };
+        }
+      }
+      if (saved.nameReplacements && typeof saved.nameReplacements === 'object') {
+        for (const name in saved.nameReplacements) {
+          // 예전 백업은 서버명이 붙은 원본 이름으로 저장되어 있을 수 있으므로
+          // 불러올 때 캐릭터 이름만 남긴 정규화 키로 병합한다.
+          const normalizedName = getCharacterName(name);
+          if (!normalizedName) continue;
+          nameReplacements[normalizedName] = saved.nameReplacements[name];
+        }
+      }
+      if (Array.isArray(saved.transformRules)) {
+        saved.transformRules.forEach((active, i) => {
+          if (transformTextRules[i] && typeof active === 'boolean') transformTextRules[i].active = active;
+        });
+      }
+      if (typeof saved.isCompactMode === 'boolean') isCompactMode = saved.isCompactMode;
+      if (typeof saved.showTimestamp === 'boolean') showTimestamp = saved.showTimestamp;
+      if (typeof saved.showServerName === 'boolean') showServerName = saved.showServerName;
+      if (typeof saved.hideNameIcons === 'boolean') hideNameIcons = saved.hideNameIcons;
+      if (typeof saved.colorMode === 'string') colorMode = saved.colorMode;
+      if (typeof saved.colorModeForTypes === 'boolean') colorModeForTypes = saved.colorModeForTypes;
+      if (typeof saved.colorModeForSenders === 'boolean') colorModeForSenders = saved.colorModeForSenders;
+      if (saved.bgColor) {
+        applyBgColor(saved.bgColor);
+      }
+      if (typeof saved.uiTheme === 'string') {
+        applyUiTheme(saved.uiTheme);
+      }
+      if (typeof saved.copyTarget === 'string') {
+        localStorage.setItem('ffxiv-copy-target', saved.copyTarget);
+        const radio = document.querySelector(`input[name="copy-target"][value="${saved.copyTarget}"]`);
+        if (radio) radio.checked = true;
+      }
+      // 이미 로그가 열려 있으면 현재 발신자 목록에도 즉시 반영
+      if (currentParsedLines.length) {
+        applySenderPreferencesToCurrentSenders();
+        generateOutput(currentParsedLines);
+      } else {
+        updateColours();
+      }
+    }
+
+    function saveUserSettings() {
+      try {
+        localStorage.setItem(USER_SETTINGS_KEY, JSON.stringify(buildFullSettingsPayload()));
+      } catch (e) {
+        // localStorage 사용 불가(용량 초과, 프라이빗 모드 등) 시 조용히 무시
+      }
+    }
+
+    function loadUserSettings() {
+      let saved;
+      try {
+        const raw = localStorage.getItem(USER_SETTINGS_KEY);
+        if (!raw) return;
+        saved = JSON.parse(raw);
+      } catch (e) {
+        return;
+      }
+      applySettingsPayload(saved);
+    }
+
+    function resetAllSettings() {
+      // 저장된 설정 전체 제거
+      try {
+        localStorage.removeItem(USER_SETTINGS_KEY);
+        localStorage.removeItem('ffxiv-copy-target');
+        localStorage.removeItem('ffxiv-ui-theme');
+      } catch (e) {}
+
+      // 발신자/이름 관련 설정 초기화
+      for (const key of Object.keys(senderPreferences)) delete senderPreferences[key];
+      for (const key of Object.keys(nameReplacements)) delete nameReplacements[key];
+      customSenderColours.splice(0, customSenderColours.length);
+
+      // 메시지 타입 설정 초기화
+      for (const mt of messageTypesAsArray) {
+        mt.visible = typeof mt.baseVisible === 'boolean' ? mt.baseVisible : mt.visible;
+        mt.color = mt.baseColor;
+        mt.customized = false;
+      }
+
+      // 텍스트 변환 규칙 / 채팅 설정 초기화
+      transformTextRules.forEach(rule => { rule.active = true; });
+      isCompactMode = false;
+      showTimestamp = false;
+      showServerName = false;
+      hideNameIcons = false;
+      colorMode = 'all';
+      colorModeForTypes = true;
+      colorModeForSenders = true;
+
+      // 배경색/테마/복사 포맷 초기화
+      document.body.style.backgroundColor = '';
+      document.body.style.color = '';
+      applyUiTheme('dark');
+      messageTypes['000a'].color = messageTypes['000a'].baseColor;
+
+      const radio = document.querySelector('input[name="copy-target"][value="upnote"]');
+      document.querySelectorAll('input[name="copy-target"]').forEach(el => { el.checked = false; });
+      if (radio) radio.checked = true;
+
+      // 현재 로그가 열려 있다면 기본 설정을 즉시 반영
+      if (currentParsedLines.length) {
+        addAllSenders(currentParsedLines);
+        generateOutput(currentParsedLines);
+      } else {
+        updateColours();
+      }
+      saveUserSettings();
+    }
+
+    function exportUserSettingsToFile() {
+      const payload = buildFullSettingsPayload();
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ffxiv-chat-extractor-settings.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    }
+
+    function importUserSettingsFromFile(file, onDone) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        let parsed;
+        try {
+          parsed = JSON.parse(reader.result);
+        } catch (e) {
+          onDone(false, '파일을 읽을 수 없습니다 (JSON 형식 아님)');
+          return;
+        }
+        applySettingsPayload(parsed);
+        saveUserSettings();
+        onDone(true, '설정을 불러왔습니다');
+      };
+      reader.onerror = () => onDone(false, '파일을 읽는 중 오류가 발생했습니다');
+      reader.readAsText(file);
     }
 
     function updateSearchHighlights() {
@@ -1190,6 +1554,7 @@
           if (colorChanger.value === colorChanger._oldValue) return;
           colorChanger._oldValue = colorChanger.value;
           messageType.color = colorChanger.value;
+          messageType.customized = true;
           updateColours();
         });
         gridContainer.appendChild(messageTypeElement);
@@ -1208,7 +1573,9 @@
       const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.filterSenders);
       const fragment = document.createDocumentFragment();
       const sortedSenders = getSortedSenders();
-      addTypesToggle(fragment, sortedSenders, 'input[type=checkbox]');
+      addTypesToggle(fragment, sortedSenders, 'input[type=checkbox]', (sender, visible) => {
+        senderPreferences[sender.name] = { ...senderPreferences[sender.name], visible };
+      });
       const sendersContainerElement = document.createElement("div");
       sendersContainerElement.className = 'filter-senders-container';
       for (const sender of sortedSenders) {
@@ -1223,6 +1590,7 @@
         inputElement.checked = sender.visible;
         senderElement.onclick = () => {
           sender.visible = inputElement.checked;
+          senderPreferences[sender.name] = { ...senderPreferences[sender.name], visible: sender.visible };
           generateOutput(currentParsedLines);
         }
         sendersContainerElement.appendChild(senderElement);
@@ -1232,7 +1600,7 @@
       positionPopover();
     }
 
-    function addTypesToggle(fragment, items, query) {
+    function addTypesToggle(fragment, items, query, onVisibilityChange) {
       const toggleContainer = document.createElement('div');
       toggleContainer.className = 'filter-types-toggle-container';
       const allToggle = document.createElement('span');
@@ -1247,7 +1615,10 @@
 
       function setVisibility(visibility) {
         const popoverElement = document.getElementById('filter-popover');
-        for (const item of items) item.visible = visibility;
+        for (const item of items) {
+          item.visible = visibility;
+          if (onVisibilityChange) onVisibilityChange(item, visibility);
+        }
         const inputElements = popoverElement.querySelectorAll(query);
         for (const element of inputElements) element.checked = visibility;
         generateOutput(currentParsedLines);
@@ -1339,6 +1710,9 @@
           if (checkbox.checked) hasChanges = true;
           checkbox.checked = false;
         }
+        for (const sender of sortedSenders) {
+          senderPreferences[sender.name] = { ...senderPreferences[sender.name], colorEnabled: false };
+        }
         if (hasChanges) generateOutput(currentParsedLines);
         updateColours();
       }
@@ -1363,6 +1737,7 @@
           } else {
             customSenderColours.push(sender);
           }
+          senderPreferences[sender.name] = { ...senderPreferences[sender.name], colorEnabled: checkboxElement.checked };
           updateColours();
         });
         checkboxElement.addEventListener('change', () => {
@@ -1372,6 +1747,7 @@
         colorElement.value = sender.customColor || '#ffffff';
         colorElement.addEventListener('input', () => {
           sender.customColor = colorElement.value;
+          senderPreferences[sender.name] = { ...senderPreferences[sender.name], customColor: sender.customColor };
           if (!checkboxElement.checked) checkboxElement.click();
           updateColours();
         });
@@ -1399,7 +1775,8 @@
         // 빈 이름(시스템 로그 등)은 이름 변경 목록에서 제외
         if (!sender.name || sender.name.trim() === '') continue;
 
-        const rule = nameReplacements[sender.name] || { newName: '', active: false };
+        const normalizedSenderName = getCharacterName(sender.name);
+        const rule = nameReplacements[normalizedSenderName] || { newName: '', active: false };
 
         const row = document.createElement('div');
         row.className = 'filter-message-type-grid hover-highlight';
@@ -1425,12 +1802,13 @@
 
         const applyChange = () => {
           const newName = input.value.trim();
+          const normalizedSenderName = getCharacterName(sender.name);
           if (newName && checkbox.checked) {
-            nameReplacements[sender.name] = { newName, active: true };
+            nameReplacements[normalizedSenderName] = { newName, active: true };
           } else if (newName && !checkbox.checked) {
-            nameReplacements[sender.name] = { newName, active: false };
+            nameReplacements[normalizedSenderName] = { newName, active: false };
           } else {
-            delete nameReplacements[sender.name];
+            delete nameReplacements[normalizedSenderName];
             checkbox.checked = false;
           }
           generateOutput(currentParsedLines);
@@ -1465,17 +1843,6 @@
       const fragment = document.createDocumentFragment();
       const settingsContainerElement = document.createElement('div');
       settingsContainerElement.className = 'chat-settings-popover-container';
-      
-      // 배경색 선택
-      const bgColorSetting = document.createElement('div');
-      bgColorSetting.className = 'chat-setting hover-highlight';
-      bgColorSetting.style.cssText = 'display: flex; align-items: center; padding: 2px 4px; gap: 6px;';
-      bgColorSetting.innerHTML = `
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: normal;">
-          배경색 선택: <input type="color" id="bg-color-picker" value="${document.body.style.backgroundColor ? rgbToHex(document.body.style.backgroundColor) : '#0d0d0d'}" style="vertical-align: middle;">
-        </label>
-      `;
-      settingsContainerElement.appendChild(bgColorSetting);
 
       // 같은 캐릭터 대사 붙여보기
       const compactSetting = document.createElement('div');
@@ -1495,12 +1862,6 @@
         generateOutput(currentParsedLines);
       });
       settingsContainerElement.appendChild(compactSetting);
-
-      // 배경색 이벤트 (팝오버 내 picker)
-      bgColorSetting.querySelector('#bg-color-picker').addEventListener('input', (e) => {
-        const hex = e.target.value;
-        applyBgColor(hex);
-      });
 
       const timestampSetting = document.createElement('div');
       timestampSetting.className = 'chat-setting hover-highlight';
@@ -1556,13 +1917,13 @@
       colorModeSetting.className = 'chat-setting hover-highlight';
       colorModeSetting.style.cssText = 'padding: 4px 4px 2px; border-top: 1px solid var(--ff14-gold-dark); margin-top: 4px;';
       colorModeSetting.innerHTML = `
-        <div style="font-size:0.9em; color: var(--ff14-gold-light); margin-bottom:4px;">색상 적용 방식</div>
+        <div style="font-size:0.9em; color: var(--theme-panel-accent-text); margin-bottom:4px;">색상 적용 방식</div>
         <div style="display:flex; flex-direction:column; gap:3px; padding-left:4px;">
           <label style="cursor:pointer;"><input type="radio" name="colorMode" value="name-only"> 이름색만 변경</label>
           <label style="cursor:pointer;"><input type="radio" name="colorMode" value="all"> 채팅색까지 동일하게</label>
           <label style="cursor:pointer;"><input type="radio" name="colorMode" value="half"> 채팅색은 기본 텍스트색 기준 50%</label>
         </div>
-        <div style="font-size:0.88em; color: var(--ff14-gold-light); margin: 6px 0 2px;">적용 대상</div>
+        <div style="font-size:0.88em; color: var(--theme-panel-accent-text); margin: 6px 0 2px;">적용 대상</div>
         <div style="display:flex; flex-direction:column; gap:3px; padding-left:4px;">
           <label style="cursor:pointer;"><input type="checkbox" id="colorModeForTypes"> 필터 타입에 적용</label>
           <label style="cursor:pointer;"><input type="checkbox" id="colorModeForSenders"> 발신자 색상에 적용</label>
@@ -1627,6 +1988,121 @@
         generateOutput(currentParsedLines);
         closeFilterPopover();
       };
+    }
+
+    function applyUiTheme(themeName) {
+      document.documentElement.classList.remove('theme-classic', 'theme-light');
+      if (themeName === 'classic') document.documentElement.classList.add('theme-classic');
+      else if (themeName === 'light') document.documentElement.classList.add('theme-light');
+      localStorage.setItem('ffxiv-ui-theme', themeName);
+      // 필터 타입 기본 컬러를 테마에 맞게 조정 (빛 테마는 더 진하게, 말하기·커스텀 색상은 제외)
+      if (typeof applyMessageTypeColoursForTheme === 'function') applyMessageTypeColoursForTheme(themeName);
+      // 이미 불러온 로그가 있으면 기본 텍스트색(000a 등)을 새 테마에 맞게 갱신
+      if (typeof updateColours === 'function') updateColours();
+    }
+
+    function getCurrentUiTheme() {
+      if (document.documentElement.classList.contains('theme-classic')) return 'classic';
+      if (document.documentElement.classList.contains('theme-light')) return 'light';
+      return 'dark';
+    }
+
+    function showThemeSettings() {
+      if (lastPopoverOpener === popoverOpeners.themeSettings) {
+        closeFilterPopover();
+        return;
+      }
+      const contentElement = showFilterPopoverAndGetContentElement(popoverOpeners.themeSettings);
+      const container = document.createElement('div');
+      container.style.padding = '10px';
+      container.innerHTML = `
+        <div class="chat-setting hover-highlight" style="display: flex; align-items: center; padding: 2px 4px; gap: 6px; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+            <span>배경색:</span>
+            <input type="color" id="bg-color-picker" value="${document.body.style.backgroundColor ? rgbToHex(document.body.style.backgroundColor) : '#0d0d0d'}" style="vertical-align: middle;">
+            <button type="button" id="bg-color-reset-btn" style="padding: 2px 7px; font-size: 0.82em;">초기화</button>
+          </div>
+        </div>
+        <hr style="border: none; border-top: 1px solid var(--ff14-gold-dark); margin: 0 0 8px 0;">
+        <div style="font-size:0.9em; color: var(--theme-panel-accent-text); margin-bottom:8px;">UI 테마 선택</div>
+        <button class="theme-select-btn" id="theme-dark-btn">어둠 테마</button>
+        <button class="theme-select-btn" id="theme-classic-btn">고전 테마</button>
+        <button class="theme-select-btn" id="theme-light-btn">빛 테마</button>
+        <hr style="border: none; border-top: 1px solid var(--ff14-gold-dark); margin: 8px 0;">
+        <button class="theme-select-btn" id="settings-reset-btn">설정 초기화</button>
+        <button class="theme-select-btn" id="settings-export-btn">설정 내보내기</button>
+        <button class="theme-select-btn" id="settings-import-btn">설정 불러오기</button>
+        <input type="file" id="settings-import-input" accept="application/json,.json" style="display:none;">
+        <div id="settings-io-status" style="font-size:0.8em; margin-top:6px; min-height: 1.2em; color: var(--theme-panel-accent-text);"></div>
+      `;
+      contentElement.appendChild(container);
+      positionPopover();
+
+      container.querySelector('#bg-color-picker').addEventListener('input', (e) => {
+        applyBgColor(e.target.value);
+      });
+
+      container.querySelector('#bg-color-reset-btn').addEventListener('click', () => {
+        resetBgColor();
+        container.querySelector('#bg-color-picker').value = '#0d0d0d';
+      });
+
+      const statusElement = container.querySelector('#settings-io-status');
+      let statusTimeoutId = null;
+      function showIoStatus(message, isError) {
+        statusElement.textContent = message;
+        statusElement.style.color = isError ? '#e04040' : 'var(--theme-panel-accent-text)';
+        if (statusTimeoutId) clearTimeout(statusTimeoutId);
+        statusTimeoutId = setTimeout(() => { statusElement.textContent = ''; }, 3000);
+      }
+
+      container.querySelector('#settings-reset-btn').addEventListener('click', () => {
+        if (!confirm('저장된 모든 설정을 초기화할까요?')) return;
+        resetAllSettings();
+        showIoStatus('설정을 초기화했습니다', false);
+        refreshActiveState();
+        container.querySelector('#bg-color-picker').value = '#0d0d0d';
+      });
+
+      container.querySelector('#settings-export-btn').addEventListener('click', () => {
+        exportUserSettingsToFile();
+        showIoStatus('설정을 내보냈습니다', false);
+      });
+
+      const importInput = container.querySelector('#settings-import-input');
+      container.querySelector('#settings-import-btn').addEventListener('click', () => {
+        importInput.click();
+      });
+      importInput.addEventListener('change', () => {
+        const file = importInput.files[0];
+        importInput.value = '';
+        if (!file) return;
+        importUserSettingsFromFile(file, (success, message) => {
+          showIoStatus(message, !success);
+          if (success) refreshActiveState();
+        });
+      });
+
+      const btnMap = {
+        dark: container.querySelector('#theme-dark-btn'),
+        classic: container.querySelector('#theme-classic-btn'),
+        light: container.querySelector('#theme-light-btn'),
+      };
+
+      function refreshActiveState() {
+        const current = getCurrentUiTheme();
+        for (const name in btnMap) {
+          btnMap[name].classList.toggle('active', name === current);
+        }
+      }
+      refreshActiveState();
+
+      for (const name in btnMap) {
+        btnMap[name].onclick = () => {
+          applyUiTheme(name);
+          refreshActiveState();
+        };
+      }
     }
 
     function addTransformRulesToChatSettings(settingsContainerElement) {
@@ -1934,17 +2410,55 @@
         .replace(/'/g, "&#039;");
     }
 
-    function getDisplaySenderName(sender) {
-      const serverRegex = /(Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르)$/;
-      const match = sender.match(serverRegex);
-      if (!match) return sender;
+    const senderServerRegex = /(Tonberry|Carbuncle|Chocobo|Moogle|Fenrir|톤베리|카벙클|초코보|모그리|펜리르)$/;
 
-      const serverName = match[0];
-      const characterName = sender.replace(serverRegex, '');
+    // 서버명을 제외한 캐릭터 이름만 반환한다.
+    // 이름 변경은 서버와 무관하게 이 정규화된 이름을 키로 사용한다.
+    function getCharacterName(sender) {
+      if (typeof sender !== 'string') return '';
+      return sender.replace(senderServerRegex, '');
+    }
+
+    function getServerName(sender) {
+      if (typeof sender !== 'string') return '';
+      const match = sender.match(senderServerRegex);
+      return match ? match[0] : '';
+    }
+
+    function getNameReplacement(sender) {
+      const characterName = getCharacterName(sender);
+      return nameReplacements[characterName] || null;
+    }
+
+    function applyNameReplacement(sender) {
+      const rule = getNameReplacement(sender);
+      if (rule && rule.active && rule.newName) {
+        return rule.newName + getServerName(sender);
+      }
+      return sender;
+    }
+
+    function getDisplaySenderName(sender) {
+      const serverName = getServerName(sender);
+      if (!serverName) return sender;
+
+      const characterName = getCharacterName(sender);
       if (showServerName) {
         return characterName + '@' + serverName;
       } else {
         return characterName;
+      }
+    }
+
+    // 누적된 발신자별 설정(senderPreferences)을 현재 senders 배열에 이름 기준으로 재적용
+    function applySenderPreferencesToCurrentSenders() {
+      customSenderColours.splice(0, customSenderColours.length);
+      for (const sender of senders) {
+        const pref = senderPreferences[sender.name];
+        if (!pref) continue;
+        if (typeof pref.visible === 'boolean') sender.visible = pref.visible;
+        if (typeof pref.customColor === 'string') sender.customColor = pref.customColor;
+        if (pref.colorEnabled) customSenderColours.push(sender);
       }
     }
 
@@ -1970,6 +2484,7 @@
         line.senderReference = sender;
         sender.count++;
       }
+      applySenderPreferencesToCurrentSenders();
     }
 
     function getJosa(name, josaType) {
@@ -2070,18 +2585,9 @@
 
       const timeHTML = showTimestamp ? `<span class="time">[${line.time}]</span>` : '';
 
-      // 발신자 이름 처리: 원본 이름에 먼저 치환 적용 → 서버명 처리 → 아이콘 숨김
-      let rawSender = line.sender;
-      for (const [origName, rule] of Object.entries(nameReplacements)) {
-        if (rule.active && origName && rule.newName) {
-          const escaped = origName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          rawSender = rawSender.replace(new RegExp(escaped, 'g'), rule.newName);
-        }
-      }
+      // 발신자 이름 처리: 서버명과 무관하게 캐릭터 이름을 기준으로 치환 → 서버명 처리 → 아이콘 숨김
+      const rawSender = applyNameReplacement(line.sender);
       let displaySender = getDisplaySenderName(rawSender);
-      if (hideNameIcons) {
-        displaySender = displaySender.replace(/^[^a-zA-Z가-힣0-9]+/g, '');
-      }
 
       // 001d 메시지 내 다른 캐릭터 이름도 nameReplacements 적용
       let processedMessage = message;
@@ -2147,7 +2653,7 @@
 
       element.innerHTML =
         timeHTML +
-        (isEmote && !displaySender
+        (!displaySender
           ? ''
           : `<span class="sender">${prependSender}${displaySender}${isEmoteCustom ? senderSuffix : (isEmote ? senderSuffix : ':')}</span> `) +
         `<span class="message">${processedMessage}</span>`;
@@ -2261,7 +2767,10 @@
           return '#' + m.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('');
         }
       }
-      return document.body.classList.contains('white-mode') ? '#000000' : '#ffffff';
+      if (document.body.classList.contains('white-mode')) return '#000000';
+      // 빛 테마는 밝은 파치먼트 배경이므로 기본 텍스트색을 어둡게
+      if (document.documentElement.classList.contains('theme-light')) return '#3c2a1f';
+      return '#ffffff';
     }
 
     // hex 또는 rgb() 형태 모두 처리하는 blendColors
@@ -2304,6 +2813,7 @@
           });
         }
       }
+      saveUserSettings();
     }
 
     function applyColorMode(lines, color, mode, baseTextColor) {
@@ -2338,6 +2848,62 @@
       const g = Math.round(g1 * (1-ratio) + g2 * ratio);
       const b = Math.round(b1 * (1-ratio) + b2 * ratio);
       return `rgb(${r},${g},${b})`;
+    }
+
+    // ── 빛 테마용: 밝은 파치먼트 배경에서도 잘 보이도록 기본 컬러를 진하게 ──
+    function hexToHsl(hex) {
+      const [r, g, b] = parseColor(hex).map(v => v / 255);
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          default: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+    function hslToHex(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      const toHex = x => Math.round(x * 255).toString(16).padStart(2, '0');
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    function darkenColorForLightTheme(hex) {
+      const [h, s, l] = hexToHsl(hex);
+      const newL = Math.min(l, 40);        // 명도 상한을 낮춰 밝은 배경에서도 잘 보이게
+      const newS = Math.min(100, s * 1.15); // 채도를 살짝 강조해 색이 탁해 보이지 않게
+      return hslToHex(h, newS, newL);
+    }
+    // 테마 전환 시 필터 타입 기본 컬러 적용 (말하기 000a 제외, 사용자가 직접 고른 색은 유지)
+    function applyMessageTypeColoursForTheme(themeName) {
+      for (const mt of messageTypesAsArray) {
+        if (mt.code === '000a' || mt.customized) continue;
+        mt.color = (themeName === 'light') ? darkenColorForLightTheme(mt.baseColor) : mt.baseColor;
+      }
     }
 
     function clearObjectURLs() {
